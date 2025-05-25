@@ -1,31 +1,33 @@
-import { StyleSheet, Text, View, TextInput } from "react-native";
+import {
+  StyleSheet,
+  Text,
+  View,
+  TextInput,
+  TouchableOpacity,
+} from "react-native";
 import Ionicons from "@expo/vector-icons/Ionicons";
 // import { Colors, Spacing, Typography } from "../../styles";
 import React from "react";
 import { useTheme } from "../../context/ThemeContext";
-export default function SearchBar({ placeholder, type, onPress }) {
+export default function SearchBar({ placeholder, type, onChangeText, value }) {
   const { Colors, Typography } = useTheme();
+
   const styles = StyleSheet.create({
     container: {
-      display: "flex",
       flexDirection: "row",
       width: "100%",
-      alignContent: "center",
-      justifyContent: "center",
+      alignItems: "center",
       padding: 10,
       borderRadius: 10,
       backgroundColor: Colors.card,
-      color: Colors.textPrimary,
     },
     search: {
-      // padding: 15,
       paddingVertical: 10,
       width: "90%",
       color: Colors.textPrimary,
       outlineStyle: "none",
     },
     icon: {
-      display: "flex",
       alignSelf: "center",
       justifyContent: "center",
       color: Colors.textPrimary,
@@ -40,7 +42,8 @@ export default function SearchBar({ placeholder, type, onPress }) {
         style={styles.search}
         placeholder={placeholder}
         keyboardType={type}
-        onPress={onPress}
+        onChangeText={onChangeText}
+        value={value}
       />
     </View>
   );

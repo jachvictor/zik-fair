@@ -6,6 +6,7 @@ import {
   Pressable,
   Touchable,
   ScrollView,
+  TouchableOpacity,
 } from "react-native";
 import React from "react";
 import AntDesign from "@expo/vector-icons/AntDesign";
@@ -13,7 +14,13 @@ import Ionicons from "@expo/vector-icons/Ionicons";
 // import { Colors, Typography, Spacing } from "../../styles";
 import { useTheme } from "../../context/ThemeContext";
 
-export default function CategoryCard({ name, address, image }) {
+export default function CategoryCard({
+  name,
+  address,
+  image,
+  onPress,
+  rating,
+}) {
   const { Colors, Typography } = useTheme();
 
   const styles = StyleSheet.create({
@@ -83,7 +90,12 @@ export default function CategoryCard({ name, address, image }) {
 
   return (
     <View style={styles.container}>
-      <Image style={styles.image} source={image} />
+      <TouchableOpacity style={styles.image} onPress={onPress}>
+        <Image
+          style={{ width: "100%", height: "100%", borderRadius: 10 }}
+          source={image}
+        />
+      </TouchableOpacity>
       <View style={styles.wrapDetails}>
         <View style={styles.details}>
           <ScrollView horizontal>
@@ -102,7 +114,7 @@ export default function CategoryCard({ name, address, image }) {
         <View style={styles.bottom}>
           <View style={styles.wrapRating}>
             <AntDesign size={25} name="star" color={"gold"} />
-            <Text style={{ color: Colors.textPrimary }}>4.5</Text>
+            <Text style={{ color: Colors.textPrimary }}>{rating}</Text>
           </View>
           <Ionicons size={25} name="heart" color={Colors.secondary} />
         </View>

@@ -28,7 +28,7 @@ export default function Login() {
     container: {
       flex: 1,
       width: "100%",
-      height: "100vh",
+      height: "100%",
       paddingHorizontal: 10,
       paddingVertical: 30,
       // gap: 20,
@@ -40,7 +40,7 @@ export default function Login() {
     header: {
       fontSize: Typography.fontSize.lg,
       fontWeight: "bold",
-      color: Colors.textPrimary,
+      color: Colors.white,
       margin: 10,
     },
     message: {
@@ -50,7 +50,8 @@ export default function Login() {
     input: {
       padding: 10,
       borderColor: Colors.border,
-      // backgroundColor: Colors.background,
+      width: "100%",
+      backgroundColor: Colors.white,
       borderRadius: 10,
       borderWidth: 1,
     },
@@ -129,14 +130,19 @@ export default function Login() {
   return (
     // <ScrollView style={{ width: "100%", flex: 1, height: "100vh" }}>
     <SafeAreaView style={styles.container}>
-      <ScrollView style={{ width: "100%", flex: 1 }}>
-        <Image style={{ width: 160, height: 50 }} source={logo} />
-
+      <Image
+        style={{ display: "flex", width: 160, height: 50 }}
+        source={logo}
+      />
+      <ScrollView
+        style={{ width: "100%", flex: 1, display: "flex", gap: 5 }}
+        showsVerticalScrollIndicator={false}
+      >
         <View style={styles.holdInputs}>
           <Text style={styles.header}>Log In</Text>
           <View style={styles.holdInputs}>
             <TextInput
-              style={Input}
+              style={styles.input}
               placeholder="Email"
               value={email}
               onChangeText={(text) => setEmail(text)}
@@ -161,17 +167,25 @@ export default function Login() {
             flexDirection: "row",
             justifyContent: "space-between",
             width: "100%",
-            marginTop:10
+            marginTop: 20,
           }}
         >
           <Text
-            style={{ borderBottomWidth: 2, borderColor: Colors.black }}
+            style={{
+              borderBottomWidth: 2,
+              borderColor: Colors.white,
+              color: Colors.white,
+            }}
             onPress={() => navigate("Signup")}
           >
             Signup
           </Text>
           <Text
-            style={{ borderBottomWidth: 2, borderColor: Colors.black }}
+           style={{
+            borderBottomWidth: 2,
+            borderColor: Colors.white,
+            color: Colors.white,
+          }}
             onPress={() => navigate("Forgot")}
           >
             Forgot password

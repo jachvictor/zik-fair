@@ -29,7 +29,7 @@ export default function AddBusiness() {
   const { Colors, Typography } = useTheme();
   const { setLoading } = useAppContext();
   const [selectedCat, setSelectedCat] = useState("");
-  const [selectedLocation, setSelectedLocation] = useState();
+  const [selectedLocation, setSelectedLocation] = useState("");
   const styles = StyleSheet.create({
     container: {
       flex: 1,
@@ -80,11 +80,25 @@ export default function AddBusiness() {
   });
   const { navigate } = useNavigation();
   const [businessImage, setBusinessImage] = useState(null);
-  const [user, setUser] = useState({});
+  const [user, setUser] = useState(null);
+  useEffect(() => {
+    const fetchUser = async () => {
+      try {
+        const storedData = await AsyncStorage.getItem("user");
+        const parsedUser = storedData ? JSON.parse(storedData) : {};
+        console.log("Fetched User2:", parsedUser);
+        setUser(parsedUser);
+        setForm({ ...form, owner: parsedUser._id });
+      } catch (error) {
+        console.error("Error fetching user:", error);
+      }
+    };
 
+    fetchUser();
+  }, []);
   const [sampleImages, setSampleImages] = useState([]);
   const [form, setForm] = useState({
-    businessEmail: user.vendorEmail,
+    owner: "",
     name: "",
     category: selectedCat,
     address: "",
@@ -148,21 +162,26 @@ export default function AddBusiness() {
   };
 
   const handleSubmit = async () => {
+    // console.log("form", form);
+
     if (
       !form.name ||
       !form.phone ||
       !form.about ||
       !form.address ||
-      !form.businessEmail ||
       !form.category ||
       !form.location ||
       !businessImage ||
       sampleImages.length === 0
     ) {
       Toast.warn("Please fill out all required fields and add images.");
+      console.log("form", form);
       return;
+    } else if (form.phone.length !== 11) {
+      return Toast.warn("Invalid phone number, must a nigerian phone number");
     }
     setLoading(true);
+
     try {
       const cover = await UploadImageToCloudinary(businessImage);
       if (!cover) {
@@ -182,7 +201,6 @@ export default function AddBusiness() {
 
         throw new Error("No sample images uploaded");
       }
-
       const payload = {
         ...form,
         coverImage: cover,
@@ -200,6 +218,7 @@ export default function AddBusiness() {
         setForm({
           name: "",
           address: "",
+          category: "",
           location: "",
           phone: "",
           whatsapp: "",
@@ -217,20 +236,25 @@ export default function AddBusiness() {
       console.error(err);
     }
   };
-  useEffect(() => {
-    const fetchUser = async () => {
-      try {
-        const storedData = await AsyncStorage.getItem("user");
-        const parsedUser = storedData ? JSON.parse(storedData) : {};
-        console.log("Fetched User2:", parsedUser);
-        setUser(parsedUser);
-      } catch (error) {
-        console.error("Error fetching user:", error);
-      }
-    };
 
-    fetchUser();
-  }, []);
+  const handleCategoryChange = (value) => {
+    setSelectedCat(value);
+    setForm((prev) => ({ ...prev, category: value }));
+  };
+  const handleLocationChange = (value) => {
+    setSelectedLocation(value);
+    setForm((prev) => ({ ...prev, location: value }));
+  };
+  const normalizeURL = (url) => {
+    if (!/^https?:\/\//i.test(url)) {
+      return `https://${url}`;
+    }
+    return url;
+  };
+
+  // Example
+  // const cleanFacebook = normalizeURL(facebook);
+
   return (
     <SafeAreaView style={styles.container}>
       <ScrollView style={styles.container}>
@@ -262,7 +286,7 @@ export default function AddBusiness() {
           <DropDown
             header={"Select categeory"}
             selected={selectedCat}
-            setSelected={setSelectedCat}
+            setSelected={handleCategoryChange}
             array={categories}
             background={Colors.card}
             textColor={Colors.textPrimary}
@@ -270,7 +294,7 @@ export default function AddBusiness() {
           <DropDown
             header={"Select Location"}
             selected={selectedLocation}
-            setSelected={setSelectedLocation}
+            setSelected={handleLocationChange}
             array={locationList}
             background={Colors.card}
             textColor={Colors.textPrimary}
@@ -290,24 +314,35 @@ export default function AddBusiness() {
           />
           <TextInput
             style={styles.input}
-            placeholder="WhatsApp"
+            keyboardType="number-pad"
+            placeholder="WhatsApp number (nigeria)"
             value={form.whatsapp}
             onChangeText={(val) => setForm({ ...form, whatsapp: val })}
           />
           <TextInput
             style={styles.input}
+            keyboardType="url"
             placeholder="FaceBook"
             value={form.facebook}
             onChangeText={(val) => setForm({ ...form, facebook: val })}
+            onBlur={() => {
+              if (form.facebook && !/^https?:\/\//i.test(form.facebook)) {
+                setForm({ ...form, facebook: `https://${form.facebook}` });
+              }
+            }}
           />
           <TextInput
             style={styles.input}
             placeholder="Businness Web site"
+            keyboardType="url"
             value={form.website}
-            onChangeText={(val) => setForm({ ...form, website: val })}
+            onChangeText={(val) =>
+              setForm({ ...form, website: normalizeURL(val) })
+            }
           />
           <TextInput
             style={styles.input}
+            keyboardType="twitter"
             placeholder="Twiiter/X Handle"
             value={form.twitter}
             onChangeText={(val) => setForm({ ...form, twitter: val })}

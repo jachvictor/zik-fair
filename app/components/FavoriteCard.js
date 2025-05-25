@@ -4,7 +4,7 @@ import Ionicons from "@expo/vector-icons/Ionicons";
 import { useTheme } from "../context/ThemeContext";
 import AntDesign from "@expo/vector-icons/AntDesign";
 import { TouchableOpacity } from "react-native";
-export default function FavoriteCard({ source, name, address, onPress }) {
+export default function FavoriteCard({ source, name, address, onPress,onDelete }) {
   const { Colors, Typography } = useTheme();
   const styles = StyleSheet.create({
     container: {
@@ -39,7 +39,7 @@ export default function FavoriteCard({ source, name, address, onPress }) {
       </TouchableOpacity>
       <Text style={styles.name}>{name}</Text>
       <Text style={styles.address}>{address}</Text>
-      <AntDesign size={24} color={Colors.danger} name="delete" />
+      <AntDesign size={24} color={Colors.danger} name="delete" onPress={onDelete}/>
     </View>
   );
 }

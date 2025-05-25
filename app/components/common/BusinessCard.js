@@ -3,7 +3,8 @@ import React from "react";
 import AntDesign from "@expo/vector-icons/AntDesign";
 import Ionicons from "@expo/vector-icons/Ionicons";
 import { useTheme } from "../../context/ThemeContext";
-export default function BusinessCard({ image, category, address, onPress }) {
+import { useNavigation } from "@react-navigation/native";
+export default function BusinessCard({ image, category, address, onPress, id }) {
   const { Colors, Typography } = useTheme();
   const styles = StyleSheet.create({
     container: {
@@ -22,8 +23,8 @@ export default function BusinessCard({ image, category, address, onPress }) {
       width: 200,
       height: 130,
       borderRadius: 16,
-      borderWidth:1,
-      borderColor:Colors.border
+      borderWidth: 1,
+      borderColor: Colors.border,
     },
     bottom: {
       display: "flex",
@@ -48,6 +49,10 @@ export default function BusinessCard({ image, category, address, onPress }) {
       color: Colors.textSecondary,
     },
   });
+  const { navigate } = useNavigation();
+  const handelNavigate = (businessId) => {
+    navigate("productDetail", { id: businessId });
+  };
 
   return (
     <View style={styles.container}>

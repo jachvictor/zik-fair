@@ -63,7 +63,15 @@ export default function PopUp({ message, handleNo, handleYes }) {
   return (
     <SafeAreaView style={styles.container}>
       <View style={styles.card}>
-        <Text>{message}</Text>
+        <Text
+          style={{
+            color: Colors.textPrimary,
+            display: "flex",
+            textAlign: "center",
+          }}
+        >
+          {message}
+        </Text>
         <View style={styles.buttons}>
           <TouchableOpacity
             style={styles.buttonDanger}

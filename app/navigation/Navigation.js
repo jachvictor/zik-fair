@@ -164,7 +164,7 @@ export default function Navigation() {
         <stack.Screen
           name="MyBusinessList"
           component={MyBusinessList}
-          options={{ headerTitle: "My Business" }}
+          options={{ headerShown: false }}
         />
         <stack.Screen
           name="AddBusiness"

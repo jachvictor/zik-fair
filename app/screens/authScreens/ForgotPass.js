@@ -27,19 +27,19 @@ export default function ForgotPass() {
     container: {
       flex: 1,
       width: "100%",
-      height: "100vh",
+      height: "100%",
       paddingHorizontal: 10,
       paddingVertical: 30,
       // gap: 20,
       display: "flex",
       alignItems: "center",
       justifyContent: "space-between",
-      // backgroundColor: "blue",
+      backgroundColor: Colors.primary,
     },
     header: {
       fontSize: Typography.fontSize.lg,
       fontWeight: "bold",
-      color: Colors.textPrimary,
+      color: Colors.white,
       margin: 10,
     },
     message: {
@@ -49,7 +49,8 @@ export default function ForgotPass() {
     input: {
       padding: 10,
       borderColor: Colors.border,
-      // backgroundColor: Colors.background,
+      width: "100%",
+      backgroundColor: Colors.white,
       borderRadius: 10,
       borderWidth: 1,
     },
@@ -58,7 +59,7 @@ export default function ForgotPass() {
       width: "100%",
       gap: 10,
       marginTop: 5,
-      padding: 10,
+      // padding: 10,
       // backgroundColor: Colors.card,
       borderRadius: 5,
       alignItems: "center",
@@ -88,16 +89,19 @@ export default function ForgotPass() {
     }
 
     setLoading(true);
-    const formData = {email};
+    const formData = { email };
     // console.log(formData);
     try {
-      const response = await fetch("http://localhost:5000/api/auth/forgot-password", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(formData),
-      });
+      const response = await fetch(
+        "http://localhost:5000/api/auth/forgot-password",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(formData),
+        }
+      );
 
       const resData = await response.json();
       console.log("respone", resData);
@@ -121,9 +125,9 @@ export default function ForgotPass() {
   return (
     // <ScrollView style={{ width: "100%", flex: 1, height: "100vh" }}>
     <SafeAreaView style={styles.container}>
-      <ScrollView style={{ width: "100%", flex: 1 }}>
-        <Image style={{ width: 160, height: 50 }} source={logo} />
+      <Image style={{ width: 160, height: 50 }} source={logo} />
 
+      <ScrollView style={{ width: "100%", flex: 1 }}>
         <View style={styles.holdInputs}>
           <Text style={styles.header}>Forgot Password</Text>
 
@@ -134,7 +138,7 @@ export default function ForgotPass() {
 
           <View style={styles.holdInputs}>
             <TextInput
-              style={Input}
+              style={styles.input}
               placeholder="Email"
               value={email}
               onChangeText={(text) => setEmail(text)}
@@ -154,10 +158,15 @@ export default function ForgotPass() {
             flexDirection: "row",
             justifyContent: "space-between",
             width: "100%",
+            marginTop: 20,
           }}
         >
           <Text
-            style={{ borderBottomWidth: 2, borderColor: Colors.black }}
+            style={{
+              borderBottomWidth: 2,
+              borderColor: Colors.white,
+              color: Colors.white,
+            }}
             onPress={() => navigate("Reset")}
           >
             reset password

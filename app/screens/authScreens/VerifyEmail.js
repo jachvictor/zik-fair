@@ -6,13 +6,15 @@ import {
   Text,
   TextInput,
   View,
+  Image,
 } from "react-native";
 import React, { useState } from "react";
+import logo from "../../../assets/logo2.png";
 import { TouchableOpacity } from "react-native";
 import { useTheme } from "../../context/ThemeContext";
 import { useNavigation } from "@react-navigation/native";
 import ToastManager, { Toast } from "toastify-react-native";
-import { Input } from "../../styles";
+import { Button, Input } from "../../styles";
 import { useAppContext } from "../../context/AppContext";
 
 export default function VerifyEmail({ route }) {
@@ -21,44 +23,57 @@ export default function VerifyEmail({ route }) {
   const styles = StyleSheet.create({
     container: {
       flex: 1,
-      display: "flex",
       width: "100%",
-      padding: 10,
-      gap: 10,
-    },
-    holdHeader: {
+      height: "100%",
+      paddingHorizontal: 10,
+      paddingVertical: 30,
+      // gap: 20,
       display: "flex",
-      gap: 5,
-      width: "100%",
+      alignItems: "center",
+      justifyContent: "space-between",
+      backgroundColor: Colors.primary,
     },
     header: {
       fontSize: Typography.fontSize.lg,
       fontWeight: "bold",
-      color: Colors.textPrimary,
-      textAlign: "center",
+      color: Colors.white,
+      margin: 10,
     },
-    meassage: {
+    message: {
       fontSize: Typography.fontSize.md,
-      textAlign: "center",
-      color: Colors.textSecondary,
+      color: "silver",
     },
     input: {
       padding: 10,
       borderColor: Colors.border,
+      width: "100%",
       backgroundColor: Colors.white,
       borderRadius: 10,
       borderWidth: 1,
     },
-    form: {
+    holdInputs: {
       display: "flex",
       width: "100%",
-      gap: 5,
-      padding: 10,
+      gap: 10,
+      marginTop: 5,
+      // padding: 10,
+      // backgroundColor: Colors.card,
       borderRadius: 5,
-      marginTop: 10,
+      alignItems: "center",
+    },
+    holdSamples: {
+      display: "flex",
+      flexDirection: "row",
+      width: "100%",
+      flexWrap: "wrap",
+      gap: 5,
+      marginTop: 5,
+      padding: 5,
+      borderRadius: 5,
       backgroundColor: Colors.card,
     },
   });
+
   const { navigate } = useNavigation();
   const { data } = route.params;
   const [token, setToken] = useState();
@@ -90,8 +105,7 @@ export default function VerifyEmail({ route }) {
       const resData = await response.json();
       console.log("respone", resData);
 
-      // if (resData.success) {
-      if (true) {
+      if (resData.success) {
         setLoading(false);
         Toast.success(resData.message);
         setTimeout(() => {
@@ -110,38 +124,40 @@ export default function VerifyEmail({ route }) {
 
   return (
     <SafeAreaView style={styles.container}>
-      <ScrollView style={styles.container}>
-        <View style={styles.holdHeader}>
+      <Image
+        style={{ display: "flex", width: 160, height: 50 }}
+        source={logo}
+      />
+
+      <ScrollView
+        style={{ width: "100%", flex: 1, display: "flex", gap: 5 }}
+        showsVerticalScrollIndicator={false}
+      >
+        <View style={styles.holdInputs}>
           <Text style={styles.header}>Email Verification</Text>
-          <Text style={styles.meassage}>
+          <Text style={styles.message}>
             Kindly provide the token sent to your school email
           </Text>
-        </View>
-        <View style={styles.form}>
-          <TextInput
-            style={styles.input}
-            value={email}
-            onChangeText={(text) => setEmail(text)}
-          />
-          <TextInput
-            style={styles.input}
-            value={token}
-            onChangeText={(text) => setToken(text)}
-          />
-          <TouchableOpacity
-            style={{
-              backgroundColor: Colors.secondary,
-              color: Colors.white,
-              borderRadius: 5,
-              padding: 10,
-              width: "100%",
-              textAlign: "center",
-              marginVertical: 10,
-            }}
-            onPress={() => handleVerify()}
-          >
-            Submit
-          </TouchableOpacity>
+          <View style={styles.holdInputs}>
+            <TextInput
+              style={styles.input}
+              value={email}
+              onChangeText={(text) => setEmail(text)}
+              placeholder="Email"
+            />
+            <TextInput
+              style={styles.input}
+              value={token}
+              onChangeText={(text) => setToken(text)}
+              placeholder="Token"
+            />
+            <TouchableOpacity
+              style={Button.button}
+              onPress={() => handleVerify()}
+            >
+              <Text style={Button.buttonText}>Submit</Text>
+            </TouchableOpacity>
+          </View>
         </View>
       </ScrollView>
       <ToastManager />

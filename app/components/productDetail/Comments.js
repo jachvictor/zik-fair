@@ -1,10 +1,11 @@
 import { StyleSheet, Text, View } from "react-native";
-import React from "react";
+import React, { useState } from "react";
 import { useTheme } from "../../context/ThemeContext";
 import AntDesign from "@expo/vector-icons/AntDesign"; //twitter
 
-export default function Comments({ comments, name, rating, icon }) {
+export default function Comments({ comments, name, rating, id, user }) {
   const { Colors, Typography } = useTheme();
+
   const styles = StyleSheet.create({
     container: {
       display: "flex",
@@ -39,6 +40,9 @@ export default function Comments({ comments, name, rating, icon }) {
     comment: {
       fontSize: Typography.fontSize.md,
       color: Colors.textSecondary,
+      display: "flex",
+      flexWrap: "wrap",
+      width: "100%",
     },
     rating: {
       display: "flex",
@@ -49,17 +53,18 @@ export default function Comments({ comments, name, rating, icon }) {
       fontSize: Typography.fontSize.lg,
     },
   });
+
   return (
     <View style={styles.container}>
-      <Text style={styles.icon}>{icon}</Text>
+      <Text style={styles.icon}>{comments.sender[0]}</Text>
 
       <View style={styles.details}>
-        <Text style={styles.name}>{name}</Text>
+        <Text style={styles.name}>{user ? "you" : comments.sender}</Text>
         <View style={styles.rating}>
           <AntDesign name="star" size={24} color="gold" />
-          <Text style={{ color: Colors.textPrimary }}>4.5</Text>
+          <Text style={{ color: Colors.textPrimary }}>{comments.rating}</Text>
         </View>
-        <Text style={styles.comment}>{comments}</Text>
+        <Text style={styles.comment}>{comments.text}</Text>
       </View>
       {/* <Text>Comments</Text> */}
     </View>

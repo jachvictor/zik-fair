@@ -11,7 +11,7 @@ import {
 import React, { useState } from "react";
 import logo from "../../../assets/logo2.png";
 import { useTheme } from "../../context/ThemeContext";
-import { Button, Input } from "../../styles";
+import { Button } from "../../styles";
 import { useNavigation } from "@react-navigation/native";
 import { location as locationList } from "../../data";
 import { DropDown, Password } from "../../components";
@@ -49,7 +49,8 @@ export default function Signup() {
     input: {
       padding: 10,
       borderColor: Colors.border,
-      // backgroundColor: Colors.background,
+      width: "100%",
+      backgroundColor: Colors.white,
       borderRadius: 10,
       borderWidth: 1,
     },
@@ -160,11 +161,11 @@ export default function Signup() {
             <TextInput
               value={name}
               onChangeText={(text) => setName(text)}
-              style={Input}
+              style={styles.input}
               placeholder="User Name"
             />
             <TextInput
-              style={Input}
+              style={styles.input}
               placeholder="Email"
               value={email}
               onChangeText={(text) => setEmail(text)}
@@ -180,7 +181,7 @@ export default function Signup() {
               placeholder={"Confirm Password"}
             />
             <TextInput
-              style={Input}
+              style={styles.input}
               placeholder="Address e.g; lodge"
               value={address}
               onChangeText={(text) => setAddress(text)}
@@ -190,6 +191,7 @@ export default function Signup() {
               header={"Select your Location"}
               selected={location}
               setSelected={setLocation}
+              background={Colors.white}
             />
             <TouchableOpacity
               style={Button.button}

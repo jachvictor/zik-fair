@@ -21,7 +21,7 @@ export default function Password({ password, setPassword, placeholder }) {
       backgroundColor: Colors.white,
       borderRadius: 5,
 
-      gap: 10,
+      gap: 5,
     },
     holdHeader: {
       width: "100%",
@@ -31,7 +31,9 @@ export default function Password({ password, setPassword, placeholder }) {
       justifyContent: "space-between",
       borderColor: Colors.border,
       borderWidth: 2,
-      padding: 5,
+      borderRadius: 5,
+
+      padding: 3,
       gap: 5,
     },
     item: {
@@ -39,14 +41,14 @@ export default function Password({ password, setPassword, placeholder }) {
       padding: 5,
     },
     input: {
-      padding: 10,
+      padding: 8,
       //   borderColor: LightColors.border,
-      // width: "100%",
+      width: "100%",
 
       borderWidth: 0, // Removes the outline
 
       backgroundColor: Colors.white,
-        outline:"one"
+      outline: "one",
       //   borderRadius: 10,
       //   borderWidth: 1,
     },

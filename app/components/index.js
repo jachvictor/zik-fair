@@ -14,6 +14,8 @@ import Password from "./common/Password";
 import EmptyScreen from "./common/EmptyScreen";
 import Comments from "./productDetail/Comments";
 import PopUp from "./common/PopUp";
+import EditProfile from "./common/EditProfile";
+import ErrorScreen from "./common/ErrorScreen";
 export {
   SearchBar,
   HomeHeader,
@@ -31,4 +33,6 @@ export {
   EmptyScreen,
   Comments,
   PopUp,
+  EditProfile,
+  ErrorScreen,
 };

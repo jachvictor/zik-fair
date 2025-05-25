@@ -1,5 +1,4 @@
 import {
-  Button,
   StyleSheet,
   Text,
   TextInput,
@@ -10,10 +9,14 @@ import React, { useState } from "react";
 import AntDesign from "@expo/vector-icons/AntDesign";
 import { ButtonComponent } from "../components";
 import { useTheme } from "../context/ThemeContext";
-import { Input } from "../styles";
+import { Input, Button } from "../styles";
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import ToastManager, { Toast } from "toastify-react-native";
 
-export default function Review({ comment, submit, onChange }) {
+export default function Review({ onChange, setLoading, id, handleFetch }) {
   const { Colors, Typography } = useTheme();
+  const [rate, setRate] = useState(0);
+  const [comment, setComment] = useState("");
   const styles = StyleSheet.create({
     container: {
       display: "flex",
@@ -57,6 +60,7 @@ export default function Review({ comment, submit, onChange }) {
       borderRadius: 10,
       borderColor: "silver",
       borderWidth: 2,
+      color: Colors.textPrimary,
       padding: 8,
       // display: "flex",
       textAlign: "left",
@@ -66,7 +70,6 @@ export default function Review({ comment, submit, onChange }) {
     },
   });
 
-  const [rate, setRate] = useState(0);
   const handleIncrease = () => {
     if (rate <= 4) {
       setRate(rate + 1);
@@ -78,6 +81,56 @@ export default function Review({ comment, submit, onChange }) {
       setRate(rate - 1);
     }
   };
+
+  const handleComment = async () => {
+    const storedData = await AsyncStorage.getItem("user");
+    const parsedUser = storedData ? JSON.parse(storedData) : {};
+    console.log("Fetched User2:", parsedUser);
+    if (comment === "") {
+      return Toast.warn("write a comment");
+    } else if (rate < 1) {
+      return Toast.warn("please rate this busines");
+    }
+    setLoading(true);
+    const formData = {
+      userId: parsedUser._id,
+      sender: parsedUser.name,
+      rating: rate,
+      text: comment,
+    };
+    try {
+      const response = await fetch(
+        `http://localhost:5000/api/business/add-comment/${id}`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(formData),
+        }
+      );
+
+      const resData = await response.json();
+      console.log("response", resData);
+
+      if (response.ok) {
+        setLoading(false);
+        handleFetch();
+        Toast.success(resData.message);
+
+        // Here, extract businesses and set it to the state
+        // Update this line to get the 'businesses' array
+      } else {
+        setLoading(false);
+        Toast.error(resData.message);
+      }
+    } catch (error) {
+      setLoading(false);
+      console.error("Error during fetch:", error);
+      Toast.error("Error during fetch");
+    }
+  };
+
   return (
     <View style={styles.container}>
       <Text
@@ -112,23 +165,13 @@ export default function Review({ comment, submit, onChange }) {
       <View style={styles.comment}>
         <TextInput
           multiline
-          style={Input}
+          style={styles.commentbox}
           value={comment}
           numberOfLines={4}
-          onChange={onChange}
+          onChangeText={(text) => setComment(text)}
         />
-        <TouchableOpacity
-          style={{
-            backgroundColor: Colors.secondary,
-            color: Colors.white,
-            borderRadius: 5,
-            padding: 10,
-            width: "100%",
-            textAlign: "center",
-            marginVertical: 10,
-          }}
-        >
-          Submit
+        <TouchableOpacity style={Button.button} onPress={handleComment}>
+          <Text style={Button.buttonText}>Submit</Text>
         </TouchableOpacity>
       </View>
     </View>
