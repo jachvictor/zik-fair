@@ -1,16 +1,33 @@
-import { StyleSheet, Text, View, Image, Button, Pressable } from "react-native";
+import {
+  StyleSheet,
+  Text,
+  View,
+  Image,
+  Button,
+  Pressable,
+  ScrollView,
+} from "react-native";
 import React from "react";
 import AntDesign from "@expo/vector-icons/AntDesign";
 import Ionicons from "@expo/vector-icons/Ionicons";
 import { useTheme } from "../../context/ThemeContext";
 import { useNavigation } from "@react-navigation/native";
-export default function BusinessCard({ image, category, address, onPress, id }) {
+export default function BusinessCard({
+  image,
+  category,
+  address,
+  onPress,
+  id,
+  name,
+  rating,
+  addToFav,
+}) {
   const { Colors, Typography } = useTheme();
   const styles = StyleSheet.create({
     container: {
       display: "flex",
       flexDirection: "column",
-      // width: "100vw",
+      width: 200,
       backgroundColor: Colors.card,
       flexDirection: "column",
       padding: 10,
@@ -20,7 +37,7 @@ export default function BusinessCard({ image, category, address, onPress, id }) 
       borderRadius: 16,
     },
     image: {
-      width: 200,
+      width: "100%",
       height: 130,
       borderRadius: 16,
       borderWidth: 1,
@@ -60,16 +77,25 @@ export default function BusinessCard({ image, category, address, onPress, id }) 
         <Image style={styles.image} source={image} />
       </Pressable>
       <View style={{ paddingVertical: 10, width: "100%" }}>
-        <Text style={styles.businessName}>Business name</Text>
-        <Text style={styles.address}>{address}</Text>
+        <ScrollView horizontal>
+          <Text style={styles.businessName}>{name}</Text>
+        </ScrollView>
+        <ScrollView horizontal>
+          <Text style={styles.address}>{address}</Text>
+        </ScrollView>
       </View>
       <View style={styles.bottom}>
         <View style={styles.rating}>
           <AntDesign name="star" size={24} color="gold" />
-          <Text style={{ color: Colors.textPrimary }}>4.5</Text>
+          <Text style={{ color: Colors.textPrimary }}>{rating}</Text>
         </View>
 
-        <AntDesign s size={30} color={Colors.secondary} name="heart" />
+        <AntDesign
+          size={30}
+          color={Colors.secondary}
+          name="heart"
+          onPress={addToFav}
+        />
       </View>
     </View>
   );

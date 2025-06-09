@@ -20,6 +20,7 @@ export default function CategoryCard({
   image,
   onPress,
   rating,
+  onAddFav,
 }) {
   const { Colors, Typography } = useTheme();
 
@@ -116,7 +117,12 @@ export default function CategoryCard({
             <AntDesign size={25} name="star" color={"gold"} />
             <Text style={{ color: Colors.textPrimary }}>{rating}</Text>
           </View>
-          <Ionicons size={25} name="heart" color={Colors.secondary} />
+          <Ionicons
+            size={25}
+            name="heart"
+            color={Colors.secondary}
+            onPress={onAddFav}
+          />
         </View>
       </View>
     </View>

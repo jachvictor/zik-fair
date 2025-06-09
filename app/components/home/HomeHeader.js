@@ -15,7 +15,9 @@ export default function HomeHeader() {
       display: "flex",
       flexDirection: "column",
       gap: 5,
-      padding: 16,
+      paddingHorizontal: 10,
+      paddingTop: 15,
+      paddingBottom: 10,
       backgroundColor: Colors.primary,
     },
     profile: {
@@ -53,7 +55,7 @@ export default function HomeHeader() {
       try {
         const storedData = await AsyncStorage.getItem("user");
         const parsedUser = storedData ? JSON.parse(storedData) : null;
-        console.log("Fetched User:", parsedUser);
+        // console.log("Fetched User:", parsedUser);
         setUser(parsedUser);
       } catch (error) {
         console.error("Error fetching user:", error);

@@ -3,7 +3,7 @@ import { LightColors, DarkColors } from "./Color";
 import Typography from "./Typography";
 export const Button = {
   button: {
-    backgroundColor: LightColors.secondary,
+    backgroundColor: LightColors.primary,
     borderRadius: 5,
     paddingVertical: 12,
     paddingHorizontal: 20,

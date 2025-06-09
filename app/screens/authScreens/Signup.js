@@ -7,6 +7,9 @@ import {
   StyleSheet,
   TouchableOpacity,
   ScrollView,
+  ActivityIndicator,
+  KeyboardAvoidingView,
+  Platform,
 } from "react-native";
 import React, { useState } from "react";
 import logo from "../../../assets/logo2.png";
@@ -16,66 +19,11 @@ import { useNavigation } from "@react-navigation/native";
 import { location as locationList } from "../../data";
 import { DropDown, Password } from "../../components";
 import ToastManager, { Toast } from "toastify-react-native";
-import { useAppContext } from "../../context/AppContext";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 
 export default function Signup() {
   const { Colors, Typography } = useTheme();
-  const { setLoading } = useAppContext();
   const { navigate } = useNavigation();
-  const styles = StyleSheet.create({
-    container: {
-      flex: 1,
-      width: "100%",
-      height: "100%",
-      paddingHorizontal: 10,
-      paddingVertical: 30,
-      // gap: 20,
-      display: "flex",
-      alignItems: "center",
-      justifyContent: "space-between",
-      backgroundColor: Colors.primary,
-    },
-    header: {
-      fontSize: Typography.fontSize.lg,
-      fontWeight: "bold",
-      color: Colors.white,
-      margin: 10,
-    },
-    message: {
-      fontSize: Typography.fontSize.md,
-      color: Colors.textSecondary,
-    },
-    input: {
-      padding: 10,
-      borderColor: Colors.border,
-      width: "100%",
-      backgroundColor: Colors.white,
-      borderRadius: 10,
-      borderWidth: 1,
-    },
-    holdInputs: {
-      display: "flex",
-      width: "100%",
-      gap: 10,
-      marginTop: 5,
-      // padding: 10,
-      // backgroundColor: Colors.card,
-      borderRadius: 5,
-      alignItems: "center",
-    },
-    holdSamples: {
-      display: "flex",
-      flexDirection: "row",
-      width: "100%",
-      flexWrap: "wrap",
-      gap: 5,
-      marginTop: 5,
-      padding: 5,
-      borderRadius: 5,
-      backgroundColor: Colors.card,
-    },
-  });
 
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
@@ -83,155 +31,192 @@ export default function Signup() {
   const [confirmPass, setConfirmPass] = useState("");
   const [address, setAddress] = useState("");
   const [location, setLocation] = useState("");
+  const [loading, setLoading] = useState(false);
 
   const handleRegister = async () => {
-    if (name.length < 5) {
-      Toast.warn("user name must be up to 3 characters");
-      return;
-    } else if (password.length < 8) {
-      Toast.warn("password must be up to 8 characters");
+    if (name.length < 3)
+      return Toast.warn("Name must be at least 3 characters");
+    if (!email.includes("@")) return Toast.warn("Enter a valid email address");
+    if (password.length < 8)
+      return Toast.warn("Password must be at least 8 characters");
+    if (password !== confirmPass) return Toast.warn("Passwords do not match");
+    if (!address) return Toast.warn("Please enter your address");
+    if (!location) return Toast.warn("Select a location");
 
-      return;
-    } else if (email === "") {
-      Toast.warn("this is not a valid regnumber(must be up to ten characters)");
-
-      return;
-    } else if (address === "") {
-      Toast.warn("please select your level");
-
-      return;
-    } else if (!(password === confirmPass)) {
-      Toast.warn("confirm password does not match password");
-
-      return;
-    }
     setLoading(true);
-    const formData = {
-      name,
-      email,
-      password,
-      address,
-      location,
-    };
-    // console.log(formData);
+
+    const formData = { name, email, password, address, location };
+
     try {
-      const response = await fetch("http://localhost:5000/api/auth/register", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(formData),
-      });
+      const response = await fetch(
+        "https://zikfair.onrender.com/api/auth/register",
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(formData),
+        }
+      );
 
       const resData = await response.json();
-      console.log("respone", resData);
       if (response.ok) {
-        setLoading(false);
+        // setLoading(false);
         Toast.success(resData.message);
-        await AsyncStorage.setItem("user", JSON.stringify(resData.user));
         setTimeout(() => {
           navigate("VerifyEmail", { data: email });
         }, 3000);
       } else {
-        setLoading(false);
-        Toast.error(resData.message);
+        // setLoading(false);
+        Toast.error(resData.message || "Signup failed");
       }
     } catch (error) {
+      // setLoading(false);
+      Toast.error("Network error");
+      console.error(error);
+    } finally {
       setLoading(false);
-      console.error("Error during sign up:", error);
-      Toast.error("Error during sign up:", error);
     }
   };
 
-  return (
-    // <ScrollView style={{ width: "100%", flex: 1, height: "100vh" }}>
-    <SafeAreaView style={styles.container}>
-      <Image
-        style={{ display: "flex", width: 160, height: 50 }}
-        source={logo}
-      />
+  const styles = StyleSheet.create({
+    container: {
+      flex: 1,
+      backgroundColor: Colors.background,
+      padding: 20,
+      // paddingVertical: 20,
+    },
+    logo: {
+      width: 150,
+      height: 45,
+      alignSelf: "center",
+      marginBottom: 20,
+      marginTop: 10,
+      resizeMode: "contain",
+    },
+    header: {
+      fontSize: Typography.fontSize.xl,
+      fontFamily: Typography.fontFamily.bold,
+      color: Colors.textPrimary,
+      textAlign: "center",
+      marginBottom: 6,
+    },
+    subText: {
+      fontSize: Typography.fontSize.sm,
+      color: Colors.textSecondary,
+      textAlign: "center",
+      marginBottom: 20,
+    },
+    input: {
+      backgroundColor: Colors.card,
+      borderColor: Colors.border,
+      borderWidth: 1,
+      borderRadius: 10,
+      padding: 12,
+      width: "100%",
+      color: Colors.textPrimary,
+    },
+    buttonContainer: {
+      marginTop: 20,
+      width: "100%",
+    },
+    bottomLinks: {
+      flexDirection: "row",
+      justifyContent: "space-between",
+      marginTop: 25,
+      paddingHorizontal: 5,
+    },
+    link: {
+      color: Colors.primary,
+      fontSize: Typography.fontSize.sm,
+    },
+  });
 
-      <ScrollView
-        style={{ width: "100%", flex: 1, display: "flex", gap: 5 }}
-        showsVerticalScrollIndicator={false}
+  return (
+    <SafeAreaView style={styles.container}>
+      <ToastManager />
+      <KeyboardAvoidingView
+        behavior={Platform.OS === "ios" ? "padding" : "height"}
+        style={{ flex: 1 }}
       >
-        <View style={styles.holdInputs}>
-          <Text style={styles.header}>Sign Up</Text>
-          <View style={styles.holdInputs}>
-            <TextInput
-              value={name}
-              onChangeText={(text) => setName(text)}
-              style={styles.input}
-              placeholder="User Name"
-            />
-            <TextInput
-              style={styles.input}
-              placeholder="Email"
-              value={email}
-              onChangeText={(text) => setEmail(text)}
-            />
-            <Password
-              password={password}
-              setPassword={setPassword}
-              placeholder={"Password"}
-            />
-            <Password
-              password={confirmPass}
-              setPassword={setConfirmPass}
-              placeholder={"Confirm Password"}
-            />
-            <TextInput
-              style={styles.input}
-              placeholder="Address e.g; lodge"
-              value={address}
-              onChangeText={(text) => setAddress(text)}
-            />
-            <DropDown
-              array={locationList}
-              header={"Select your Location"}
-              selected={location}
-              setSelected={setLocation}
-              background={Colors.white}
-            />
-            <TouchableOpacity
-              style={Button.button}
-              onPress={() => handleRegister()}
-            >
-              <Text style={Button.buttonText}>Get started</Text>
-            </TouchableOpacity>
-          </View>
-        </View>
-        <View
-          style={{
-            display: "flex",
-            flexDirection: "row",
-            justifyContent: "space-between",
-            width: "100%",
-            marginTop: 20,
-          }}
-        >
-          <Text
-            style={{
-              borderBottomWidth: 2,
-              borderColor: Colors.white,
-              color: "white",
-            }}
-            onPress={() => navigate("Login")}
-          >
-            Login
-          </Text>
-          <Text
-            style={{
-              borderBottomWidth: 2,
-              borderColor: Colors.white,
-              color: "white",
-            }}
-            onPress={() => navigate("VerifyEmail", { data: "" })}
-          >
-            Verify Email
-          </Text>
-        </View>
-      </ScrollView>
+        {loading ? (
+          <ActivityIndicator
+            style={{ flex: 1, backgroundColor: Colors.background }}
+            color={Colors.primary}
+            size="large"
+          />
+        ) : (
+          <ScrollView showsVerticalScrollIndicator={false}>
+            <Image source={logo} style={styles.logo} />
+            <Text style={styles.header}>Create Your Account</Text>
+            <Text style={styles.subText}>
+              Join ZikFair and grow your hustle!
+            </Text>
+
+            <View style={{ gap: 12 }}>
+              <TextInput
+                style={styles.input}
+                placeholder="User Name"
+                placeholderTextColor={Colors.textSecondary}
+                value={name}
+                onChangeText={setName}
+              />
+              <TextInput
+                style={styles.input}
+                placeholder="Email"
+                placeholderTextColor={Colors.textSecondary}
+                value={email}
+                onChangeText={setEmail}
+              />
+              <Password
+                password={password}
+                setPassword={setPassword}
+                placeholder="Password"
+              />
+              <Password
+                password={confirmPass}
+                setPassword={setConfirmPass}
+                placeholder="Confirm Password"
+              />
+              <TextInput
+                style={styles.input}
+                placeholder="Address (e.g. School Lodge)"
+                placeholderTextColor={Colors.textSecondary}
+                value={address}
+                onChangeText={setAddress}
+              />
+              <DropDown
+                array={locationList}
+                header="Select Your Location"
+                selected={location}
+                setSelected={setLocation}
+                background={Colors.card}
+                textColor={Colors.textPrimary}
+              />
+            </View>
+
+            <View style={styles.buttonContainer}>
+              <TouchableOpacity
+                onPress={handleRegister}
+                style={[Button.button, { opacity: loading ? 0.6 : 1 }]}
+                disabled={loading}
+              >
+                <Text style={Button.buttonText}>Sign Up</Text>
+              </TouchableOpacity>
+            </View>
+
+            <View style={styles.bottomLinks}>
+              <Text style={styles.link} onPress={() => navigate("Login")}>
+                Already have an account?
+              </Text>
+              <Text
+                style={styles.link}
+                onPress={() => navigate("VerifyEmail", { data: "" })}
+              >
+                Verify Email
+              </Text>
+            </View>
+          </ScrollView>
+        )}
+      </KeyboardAvoidingView>
       <ToastManager />
     </SafeAreaView>
   );

@@ -18,7 +18,7 @@ export default function Password({ password, setPassword, placeholder }) {
     container: {
       width: "100%",
       //   padding: 10,
-      backgroundColor: Colors.white,
+      backgroundColor: Colors.card,
       borderRadius: 5,
 
       gap: 5,
@@ -43,26 +43,23 @@ export default function Password({ password, setPassword, placeholder }) {
     input: {
       padding: 8,
       //   borderColor: LightColors.border,
-      width: "100%",
+      width: "60%",
 
       borderWidth: 0, // Removes the outline
-
-      backgroundColor: Colors.white,
+      color: Colors.textPrimary,
+      backgroundColor: Colors.card,
       outline: "one",
       //   borderRadius: 10,
       //   borderWidth: 1,
     },
   });
-  const handleSelect = (item) => {
-    setSelected(item);
-    setIsOpen(false);
-  };
 
   return (
     <View style={styles.container}>
       <Pressable style={styles.holdHeader}>
         <TextInput
           placeholder={placeholder}
+          placeholderTextColor={Colors.textSecondary}
           onChangeText={(text) => setPassword(text)}
           value={password}
           secureTextEntry={isOpen}
@@ -71,9 +68,13 @@ export default function Password({ password, setPassword, placeholder }) {
         />
         <TouchableOpacity onPress={() => setIsOpen(!isOpen)}>
           {isOpen ? (
-            <FontAwesome name="eye-slash" size={20} color={"black"} />
+            <FontAwesome
+              name="eye-slash"
+              size={20}
+              color={Colors.textPrimary}
+            />
           ) : (
-            <FontAwesome name="eye" size={20} color={"black"} />
+            <FontAwesome name="eye" size={20} color={Colors.textPrimary} />
           )}
         </TouchableOpacity>
       </Pressable>

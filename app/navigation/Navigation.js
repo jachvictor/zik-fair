@@ -25,6 +25,10 @@ import {
   ForgotPass,
   ResetPass,
   RegisterVendor,
+  AboutScreen,
+  PrivacyPolicyScreen,
+  TermsOfUseScreen,
+  ContactUsScreen,
 } from "../screens";
 import Loading from "../screens/splashScreens/Loading";
 // import { Colors, Typography } from "../styles";
@@ -39,51 +43,78 @@ export default function Navigation() {
   const tabs = createBottomTabNavigator();
   const TabsGroup = () => {
     return (
-      <tabs.Navigator
-        screenOptions={({ route, navigation }) => ({
-          // headerShown: false,
-          tabBarActiveTintColor: Colors.primary,
-          tabBarInactiveTintColor: Colors.border,
-          tabBarLabelStyle: {
-            fontSize: Typography.fontSize.md,
-            fontWeight: "medium",
-          },
-          tabBarStyle: {
-            // paddingVertical: 15,
-            backgroundColor: Colors.white,
-          },
-          tabBarIcon: ({ color, focused, size }) => {
-            let iconName;
-            if (route.name === "Home") {
-              iconName = "home";
-            } else if (route.name === "Search") {
-              iconName = "search";
-            } else if (route.name === "Favorite") {
-              iconName = "heart";
-            } else if (route.name === "Me") {
-              iconName = "person";
-            }
-            return <Ionicons name={iconName} size={size} color={color} />;
-          },
-        })}
-      >
-        <tabs.Screen
-          name="Home"
-          component={Home}
-          options={{ header: () => <HomeHeader /> }}
-        />
-        <tabs.Screen name="Search" component={Search} />
-        <tabs.Screen
-          name="Favorite"
-          component={Favorite}
-          options={{ headerShown: false }}
-        />
-        <tabs.Screen
-          name="Me"
-          component={Profile}
-          options={{ headerShown: false }}
-        />
-      </tabs.Navigator>
+      <View style={{ flex: 1, backgroundColor: Colors.background }}>
+        <tabs.Navigator
+          screenOptions={({ route, navigation }) => ({
+            // headerShown: false,
+            tabBarActiveTintColor: Colors.primary,
+            tabBarInactiveTintColor: Colors.textPrimary,
+            tabBarLabelStyle: {
+              fontSize: Typography.fontSize.md,
+              fontWeight: "medium",
+            },
+
+            // tabBarShowLabel: false,
+            tabBarStyle: {
+              elevation: 0,
+              backgroundColor: Colors.card, // or Colors.card from your theme
+              borderRadius: 16,
+              height: 50,
+              shadowColor: "#000",
+              shadowOffset: {
+                width: 0,
+                height: 4,
+              },
+              shadowOpacity: 0,
+              shadowRadius: 10,
+
+              margin: 5,
+              padding: 5,
+              borderWidth: 0,
+              borderColor: "transparent",
+            },
+            tabBarIcon: ({ color, focused, size }) => {
+              let iconName;
+              if (route.name === "Home") {
+                iconName = "home";
+              } else if (route.name === "Search") {
+                iconName = "search";
+              } else if (route.name === "Favorite") {
+                iconName = "heart";
+              } else if (route.name === "Me") {
+                iconName = "person";
+              }
+              return <Ionicons name={iconName} size={size} color={color} />;
+            },
+          })}
+        >
+          <tabs.Screen
+            name="Home"
+            component={Home}
+            options={{ header: () => <HomeHeader /> }}
+          />
+          <tabs.Screen
+            name="Search"
+            component={Search}
+            options={{
+              headerShown: false,
+            }}
+          />
+          <tabs.Screen
+            name="Favorite"
+            component={Favorite}
+            options={{ headerShown: false }}
+          />
+          <tabs.Screen
+            name="Me"
+            component={Profile}
+            options={{
+              headerStyle: { backgroundColor: Colors.card },
+              headerTitleStyle: { color: Colors.textPrimary },
+            }}
+          />
+        </tabs.Navigator>
+      </View>
     );
   };
 
@@ -111,9 +142,33 @@ export default function Navigation() {
           component={Login}
           options={{ headerShown: false }}
         />
-        <stack.Screen name="Forgot" component={ForgotPass} />
-        <stack.Screen name="Reset" component={ResetPass} />
-        <stack.Screen name="VerifyEmail" component={VerifyEmail} />
+        <stack.Screen
+          name="Forgot"
+          component={ForgotPass}
+          options={{
+            headerStyle: { backgroundColor: Colors.card },
+            headerTitleStyle: { color: Colors.textPrimary },
+            headerTintColor: Colors.textPrimary,
+          }}
+        />
+        <stack.Screen
+          name="Reset"
+          component={ResetPass}
+          options={{
+            headerStyle: { backgroundColor: Colors.card },
+            headerTitleStyle: { color: Colors.textPrimary },
+            headerTintColor: Colors.textPrimary,
+          }}
+        />
+        <stack.Screen
+          name="VerifyEmail"
+          component={VerifyEmail}
+          options={{
+            headerStyle: { backgroundColor: Colors.card },
+            headerTitleStyle: { color: Colors.textPrimary },
+            headerTintColor: Colors.textPrimary,
+          }}
+        />
         <stack.Screen
           name="tabs"
           component={TabsGroup}
@@ -122,20 +177,46 @@ export default function Navigation() {
         <stack.Screen
           name="VerifyVendor"
           component={VerifyVendor}
-          options={{ headerTitle: "Verification" }}
+          options={{
+            headerTitle: "Verification",
+            headerStyle: { backgroundColor: Colors.card },
+            headerTitleStyle: { color: Colors.textPrimary },
+            headerTintColor: Colors.textPrimary,
+          }}
         />
         <stack.Screen
           name="RegisterVendor"
           component={RegisterVendor}
-          options={{ headerTitle: "Verification" }}
+          options={{
+            headerTitle: "Verification",
+            headerStyle: { backgroundColor: Colors.card },
+            headerTitleStyle: { color: Colors.textPrimary },
+            headerTintColor: Colors.textPrimary,
+          }}
         />
-        <stack.Screen name="Settings" component={Settings} />
+        <stack.Screen
+          name="Settings"
+          component={Settings}
+          options={{
+            headerStyle: { backgroundColor: Colors.card },
+            headerTitleStyle: { color: Colors.textPrimary },
+            headerTintColor: Colors.textPrimary,
+          }}
+        />
         <stack.Screen
           options={{ header: () => <HomeHeader /> }}
           name="HomeScreen"
           component={Home}
         />
-        <stack.Screen name="category" component={Category} />
+        <stack.Screen
+          name="category"
+          component={Category}
+          options={{
+            headerStyle: { backgroundColor: Colors.card },
+            headerTitleStyle: { color: Colors.textPrimary },
+            headerTintColor: Colors.textPrimary,
+          }}
+        />
         <stack.Screen
           name="productDetail"
           component={ProductDetail}
@@ -146,10 +227,10 @@ export default function Navigation() {
               <TouchableOpacity
                 onPress={() => navigation.goBack()}
                 style={{
-                  marginLeft: 15,
-                  backgroundColor: Colors.border,
+                  // marginLeft: 15,
+                  backgroundColor: Colors.card,
                   padding: 10,
-                  borderRadius: 5,
+                  borderRadius: 20,
                 }}
               >
                 <FontAwesome
@@ -169,7 +250,52 @@ export default function Navigation() {
         <stack.Screen
           name="AddBusiness"
           component={AddBusiness}
-          options={{ headerTitle: "Add business" }}
+          options={{
+            headerTitle: "Add business",
+            headerStyle: { backgroundColor: Colors.card },
+            headerTitleStyle: { color: Colors.textPrimary },
+            headerTintColor: Colors.textPrimary,
+          }}
+        />
+        <stack.Screen
+          name="About"
+          component={AboutScreen}
+          options={{
+            headerTitle: "About App",
+            headerStyle: { backgroundColor: Colors.card },
+            headerTitleStyle: { color: Colors.textPrimary },
+            headerTintColor: Colors.textPrimary,
+          }}
+        />
+        <stack.Screen
+          name="PrivacyPolicy"
+          component={PrivacyPolicyScreen}
+          options={{
+            headerTitle: "Privacy Policy",
+            headerStyle: { backgroundColor: Colors.card },
+            headerTitleStyle: { color: Colors.textPrimary },
+            headerTintColor: Colors.textPrimary,
+          }}
+        />
+        <stack.Screen
+          name="TermsOfUse"
+          component={TermsOfUseScreen}
+          options={{
+            headerTitle: "Terms Of Use",
+            headerStyle: { backgroundColor: Colors.card },
+            headerTitleStyle: { color: Colors.textPrimary },
+            headerTintColor: Colors.textPrimary,
+          }}
+        />
+        <stack.Screen
+          name="ContactUs"
+          component={ContactUsScreen}
+          options={{
+            headerTitle: "Contact Us",
+            headerStyle: { backgroundColor: Colors.card },
+            headerTitleStyle: { color: Colors.textPrimary },
+            headerTintColor: Colors.textPrimary,
+          }}
         />
         {/* <stack.Screen name="category" component={Category} /> */}
       </stack.Navigator>

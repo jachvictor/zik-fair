@@ -46,8 +46,8 @@ export default function EditProfile({ loading, setLoading }) {
       flexDirection: "row",
       alignItems: "center",
       justifyContent: "space-between",
-      // borderColor: Colors.border,
-      borderWidth: 2,
+      borderColor: Colors.border,
+      borderWidth: 1,
       padding: 10,
       borderRadius: 5,
     },
@@ -70,7 +70,7 @@ export default function EditProfile({ loading, setLoading }) {
       width: "100%",
       gap: 10,
       marginTop: 5,
-      // padding: 10,
+      padding: 10,
       // backgroundColor: Colors.card,
       borderRadius: 5,
       alignItems: "center",
@@ -118,7 +118,7 @@ export default function EditProfile({ loading, setLoading }) {
     // console.log(formData);
     try {
       const response = await fetch(
-        "http://localhost:5000/api/auth/update-account",
+        "https://zikfair.onrender.com/api/auth/update-account",
         {
           method: "PUT",
           headers: {
@@ -129,7 +129,7 @@ export default function EditProfile({ loading, setLoading }) {
       );
 
       const resData = await response.json();
-      console.log("respone", resData);
+      // console.log("respone", resData);
       if (response.ok) {
         setLoading(false);
         Toast.success(resData.message);
@@ -143,8 +143,10 @@ export default function EditProfile({ loading, setLoading }) {
       }
     } catch (error) {
       setLoading(false);
-      console.error("Error during sign up:", error);
-      Toast.error("Error during sign up:", error);
+      console.error("An error occurred:", error);
+      Toast.error("An error occurred. Try again.");
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -170,11 +172,13 @@ export default function EditProfile({ loading, setLoading }) {
               onChangeText={(text) => setName(text)}
               style={styles.input}
               placeholder="User Name"
+              placeholderTextColor={Colors.textSecondary}
             />
 
             <TextInput
               style={styles.input}
               placeholder="Address e.g; lodge"
+              placeholderTextColor={Colors.textSecondary}
               value={address}
               onChangeText={(text) => setAddress(text)}
             />
@@ -190,7 +194,7 @@ export default function EditProfile({ loading, setLoading }) {
               style={Button.button}
               onPress={() => handleRegister()}
             >
-              <Text style={Button.buttonText}>Get started</Text>
+              <Text style={Button.buttonText}>Submit</Text>
             </TouchableOpacity>
           </View>
         </View>

@@ -105,7 +105,7 @@ export default function HomeCarousel() {
           source={ui}
           head={"User-Friendly Interface"}
           quote={
-            "A clean, intuitive design makes it easier for potential customers to navigate and find what they're looking for."
+            "Enjoy a clean, intuitive design that helps potential customers easily navigate and find exactly what they need."
           }
         />
       );
@@ -115,7 +115,7 @@ export default function HomeCarousel() {
           source={accurate1}
           head={"Accuracy"}
           quote={
-            "Provide accurate and complete information about businesses, including contact information, location, and hours. "
+            "Provide accurate and complete information about businesses, including contact information and location "
           }
         />
       );
@@ -127,7 +127,7 @@ export default function HomeCarousel() {
           source={review}
           head={"Review Management"}
           quote={
-            "consumer decisions, so a directory that allows customers to leave feedback is invaluable."
+            "consumer decisions implementation that allows customers to leave feedback"
           }
         />
       );
@@ -141,16 +141,6 @@ export default function HomeCarousel() {
       );
     } else if (item === "6") {
       return <CarouselImgL source={mobile2} />;
-    } else if (item === "8") {
-      return (
-        <CarouselImgR
-          source={tool1}
-          head={"Analytics Tools"}
-          quote={
-            "analytics tools are essential for tracking the performance of your listing."
-          }
-        />
-      );
     } else {
       return (
         <View style={styles.defaultContainer}>
@@ -170,6 +160,7 @@ export default function HomeCarousel() {
         horizontal={true}
         data={data}
         renderItem={renderItem}
+        keyExtractor={(item, index) => index.toString()}
       />
     </View>
   );

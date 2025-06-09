@@ -1,5 +1,4 @@
 import {
-  Pressable,
   SafeAreaView,
   ScrollView,
   StyleSheet,
@@ -7,160 +6,167 @@ import {
   TextInput,
   View,
   Image,
+  ActivityIndicator,
+  TouchableOpacity,
 } from "react-native";
 import React, { useState } from "react";
 import logo from "../../../assets/logo2.png";
-import { TouchableOpacity } from "react-native";
 import { useTheme } from "../../context/ThemeContext";
 import { useNavigation } from "@react-navigation/native";
 import ToastManager, { Toast } from "toastify-react-native";
-import { Button, Input } from "../../styles";
-import { useAppContext } from "../../context/AppContext";
+import { Button } from "../../styles";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
 export default function VerifyEmail({ route }) {
   const { Colors, Typography } = useTheme();
-  const { setLoading } = useAppContext();
+  const { navigate } = useNavigation();
+  const { data } = route.params;
+  const [token, setToken] = useState("");
+  const [email, setEmail] = useState(data || "");
+  const [loading, setLoading] = useState(false);
+
   const styles = StyleSheet.create({
     container: {
       flex: 1,
+      backgroundColor: Colors.background,
+      paddingHorizontal: 20,
+      paddingVertical: 20,
+    },
+    logo: {
+      width: 160,
+      height: 50,
+      alignSelf: "center",
+      marginBottom: 20,
+    },
+    scroll: {
+      flex: 1,
       width: "100%",
-      height: "100%",
-      paddingHorizontal: 10,
-      paddingVertical: 30,
-      // gap: 20,
-      display: "flex",
-      alignItems: "center",
-      justifyContent: "space-between",
-      backgroundColor: Colors.primary,
     },
     header: {
-      fontSize: Typography.fontSize.lg,
+      fontSize: Typography.fontSize.xl,
       fontWeight: "bold",
-      color: Colors.white,
-      margin: 10,
+      color: Colors.textPrimary,
+      textAlign: "center",
+      marginBottom: 10,
     },
     message: {
       fontSize: Typography.fontSize.md,
-      color: "silver",
+      color: Colors.textSecondary,
+      textAlign: "center",
+      marginBottom: 25,
     },
     input: {
-      padding: 10,
+      padding: 12,
       borderColor: Colors.border,
-      width: "100%",
-      backgroundColor: Colors.white,
+      backgroundColor: Colors.card,
+      color: Colors.textPrimary,
       borderRadius: 10,
       borderWidth: 1,
+      marginBottom: 15,
     },
-    holdInputs: {
-      display: "flex",
-      width: "100%",
-      gap: 10,
-      marginTop: 5,
-      // padding: 10,
-      // backgroundColor: Colors.card,
-      borderRadius: 5,
+    buttonWrapper: {
+      marginTop: 10,
       alignItems: "center",
-    },
-    holdSamples: {
-      display: "flex",
-      flexDirection: "row",
-      width: "100%",
-      flexWrap: "wrap",
-      gap: 5,
-      marginTop: 5,
-      padding: 5,
-      borderRadius: 5,
-      backgroundColor: Colors.card,
     },
   });
 
-  const { navigate } = useNavigation();
-  const { data } = route.params;
-  const [token, setToken] = useState();
-  const [email, setEmail] = useState(data);
   const handleVerify = async () => {
-    navigate("tabs", { data: email });
-    if (email === "") {
-      Toast.warn("please enter your email");
-      return;
-    } else if (token === "") {
-      Toast.warn("please enter the token sent to you email");
+    // navigate("tabs", { data: email });
 
+    if (!email) {
+      Toast.warn("Please enter your email");
+      return;
+    } else if (!token) {
+      Toast.warn("Please enter the token sent to your email");
       return;
     }
+
     setLoading(true);
-    const formData = {
-      email,
-      token,
-    };
-    // console.log(formData);
+
+    const formData = { email, token };
+
     try {
-      const response = await fetch("http://localhost:5000/api/auth/verify", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(formData),
-      });
+      const response = await fetch(
+        "https://zikfair.onrender.com/api/auth/verify",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(formData),
+        }
+      );
+
       const resData = await response.json();
-      console.log("respone", resData);
+      console.log("response", resData);
 
       if (resData.success) {
-        setLoading(false);
+        await AsyncStorage.setItem("user", JSON.stringify(resData.user));
         Toast.success(resData.message);
         setTimeout(() => {
           navigate("tabs", { data: email });
         }, 3000);
       } else {
-        setLoading(false);
-        Toast.error("Error during sign up", resData.message);
+        Toast.error(resData.message || "Verification failed");
       }
     } catch (error) {
+      console.error("Error during verification:", error);
+      Toast.error("An error occurred during verification");
+    } finally {
       setLoading(false);
-      console.error("Error during sign up:", error);
-      Toast.error("Error during sign up:", error);
     }
   };
 
   return (
-    <SafeAreaView style={styles.container}>
-      <Image
-        style={{ display: "flex", width: 160, height: 50 }}
-        source={logo}
-      />
+    <>
+      {loading ? (
+        <ActivityIndicator
+          style={{
+            flex: 1,
+            backgroundColor: Colors.background,
+            justifyContent: "center",
+          }}
+          color={Colors.primary}
+          size="large"
+        />
+      ) : (
+        <SafeAreaView style={styles.container}>
+          <Image source={logo} style={styles.logo} />
 
-      <ScrollView
-        style={{ width: "100%", flex: 1, display: "flex", gap: 5 }}
-        showsVerticalScrollIndicator={false}
-      >
-        <View style={styles.holdInputs}>
-          <Text style={styles.header}>Email Verification</Text>
-          <Text style={styles.message}>
-            Kindly provide the token sent to your school email
-          </Text>
-          <View style={styles.holdInputs}>
+          <ScrollView showsVerticalScrollIndicator={false}>
+            <Text style={styles.header}>Email Verification</Text>
+            <Text style={styles.message}>
+              Kindly enter the token sent to your email.
+            </Text>
+
             <TextInput
               style={styles.input}
-              value={email}
-              onChangeText={(text) => setEmail(text)}
               placeholder="Email"
+              placeholderTextColor={Colors.textSecondary}
+              value={email}
+              onChangeText={setEmail}
+              keyboardType="email-address"
+              autoCapitalize="none"
             />
+
             <TextInput
               style={styles.input}
-              value={token}
-              onChangeText={(text) => setToken(text)}
               placeholder="Token"
+              placeholderTextColor={Colors.textSecondary}
+              value={token}
+              onChangeText={setToken}
+              autoCapitalize="none"
             />
-            <TouchableOpacity
-              style={Button.button}
-              onPress={() => handleVerify()}
-            >
-              <Text style={Button.buttonText}>Submit</Text>
-            </TouchableOpacity>
-          </View>
-        </View>
-      </ScrollView>
+
+            <View style={styles.buttonWrapper}>
+              <TouchableOpacity style={Button.button} onPress={handleVerify}>
+                <Text style={Button.buttonText}>Submit</Text>
+              </TouchableOpacity>
+            </View>
+          </ScrollView>
+        </SafeAreaView>
+      )}
       <ToastManager />
-    </SafeAreaView>
+    </>
   );
 }

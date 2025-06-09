@@ -1,5 +1,4 @@
 import {
-  Button,
   Pressable,
   SafeAreaView,
   ScrollView,
@@ -22,12 +21,20 @@ import ToastManager, { Toast } from "toastify-react-native";
 import { useAppContext } from "../../context/AppContext";
 import { UploadImageToCloudinary } from "../../utils";
 import { DropDown } from "../../components";
+import { Button } from "../../styles";
 import { categories, location as locationList } from "../../data";
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import {
+  RewardedAd,
+  RewardedAdEventType,
+  TestIds,
+} from "react-native-google-mobile-ads";
+import { ActivityIndicator } from "react-native-web";
 
 export default function AddBusiness() {
   const { Colors, Typography } = useTheme();
-  const { setLoading } = useAppContext();
+  const { isNonPersonalized } = useAppContext();
+  const [loading, setLoading] = useState(false);
   const [selectedCat, setSelectedCat] = useState("");
   const [selectedLocation, setSelectedLocation] = useState("");
   const styles = StyleSheet.create({
@@ -55,6 +62,7 @@ export default function AddBusiness() {
       color: Colors.textPrimary,
       borderRadius: 10,
       borderWidth: 1,
+
       outlineStyle: "none",
     },
     holdInputs: {
@@ -62,7 +70,7 @@ export default function AddBusiness() {
       width: "100%",
       gap: 10,
       marginTop: 5,
-      padding: 10,
+      // padding: 10,
       backgroundColor: Colors.background,
       borderRadius: 5,
     },
@@ -77,16 +85,31 @@ export default function AddBusiness() {
       borderRadius: 5,
       backgroundColor: Colors.card,
     },
+    aboutBox: {
+      width: "100%",
+      // height: 100,
+      borderRadius: 10,
+      borderColor: Colors.border,
+      borderWidth: 1,
+      color: Colors.textPrimary,
+      padding: 8,
+      // display: "flex",
+      textAlign: "left",
+      textAlignVertical: "top",
+      alignItems: "flex-start",
+      justifyContent: "flex-start",
+    },
   });
   const { navigate } = useNavigation();
   const [businessImage, setBusinessImage] = useState(null);
   const [user, setUser] = useState(null);
+  const [imageNo, setImageNo] = useState(1);
   useEffect(() => {
     const fetchUser = async () => {
       try {
         const storedData = await AsyncStorage.getItem("user");
         const parsedUser = storedData ? JSON.parse(storedData) : {};
-        console.log("Fetched User2:", parsedUser);
+        // console.log("Fetched User2:", parsedUser);
         setUser(parsedUser);
         setForm({ ...form, owner: parsedUser._id });
       } catch (error) {
@@ -112,11 +135,14 @@ export default function AddBusiness() {
   });
 
   const pickImage = async (setter, isMultiple = false) => {
-    if (sampleImages.length > 3 && isMultiple) {
-      Toast.warn("4 images only");
+    if (sampleImages.length > imageNo && imageNo == 1 && isMultiple) {
+      Toast.warn("limit reached (watched ads to iincresae)");
       return;
     }
-
+    if (sampleImages.length > imageNo && isMultiple) {
+      Toast.warn("You can only add 4 image sample");
+      return;
+    }
     const permission = await ImagePicker.requestMediaLibraryPermissionsAsync();
     if (permission.status !== "granted") {
       Toast.warn("Permission denied!");
@@ -130,7 +156,7 @@ export default function AddBusiness() {
     });
 
     if (!result.canceled) {
-      let maxSize = 2 * 1024 * 1024; // 2MB limit
+      let maxSize = 1 * 1024 * 1024; // 1MB limit
 
       if (isMultiple) {
         setter((prev) => {
@@ -139,7 +165,7 @@ export default function AddBusiness() {
             .map((asset) => asset.uri);
 
           if (newImages.length < result.assets.length) {
-            Toast.warn("Some images exceed 2MB and were skipped.");
+            Toast.warn("Some images exceed 1MB and were skipped.");
           }
 
           return [...prev, ...newImages].slice(0, 5); // Limit to 5 images
@@ -147,7 +173,7 @@ export default function AddBusiness() {
       } else {
         let fileSize = result.assets[0].fileSize || 0;
         if (fileSize > maxSize) {
-          Toast.warn("File too large! Please upload an image under 2MB.");
+          Toast.warn("File too large! Please upload an image under 1MB.");
         } else {
           setter(result.assets[0].uri);
         }
@@ -175,7 +201,7 @@ export default function AddBusiness() {
       sampleImages.length === 0
     ) {
       Toast.warn("Please fill out all required fields and add images.");
-      console.log("form", form);
+      // console.log("form", form);
       return;
     } else if (form.phone.length !== 11) {
       return Toast.warn("Invalid phone number, must a nigerian phone number");
@@ -208,13 +234,12 @@ export default function AddBusiness() {
       };
 
       const res = await axios.post(
-        "http://localhost:5000/api/business/create-business",
+        "https://zikfair.onrender.com/api/business/create-business",
         payload
       );
 
       if (res.status === 200 || res.status === 201) {
         setLoading(false);
-        Toast.success("Business added successfully!");
         setForm({
           name: "",
           address: "",
@@ -229,11 +254,14 @@ export default function AddBusiness() {
         });
         setBusinessImage(null);
         setSampleImages([]);
+        Toast.success("Business added successfully!");
       }
     } catch (err) {
       setLoading(false);
       Toast.warn("Submission failed. Try again.");
       console.error(err);
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -245,189 +273,249 @@ export default function AddBusiness() {
     setSelectedLocation(value);
     setForm((prev) => ({ ...prev, location: value }));
   };
-  const normalizeURL = (url) => {
-    if (!/^https?:\/\//i.test(url)) {
-      return `https://${url}`;
+
+  const [isReward, setIsReward] = useState(false);
+  const rewardedId = __DEV__
+    ? TestIds.REWARDED
+    : "ca-app-pub-7487058490506362/6665624851";
+  const rewarded = RewardedAd.createForAdRequest(rewardedId, {
+    requestNonPersonalizedAdsOnly: isNonPersonalized, 
+    keywords: ["fashion", "clothing"],
+  });
+  // rewarded ad
+  useEffect(() => {
+    const unsubscribeLoaded = rewarded.addAdEventListener(
+      RewardedAdEventType.LOADED,
+      () => {
+        // Ad loaded, you can show it now or wait for user action
+        setIsReward(true);
+        rewarded.show();
+
+        console.log("Rewarded ad loaded");
+      }
+    );
+
+    // Show rewarded ad when it is closed or when user earns reward
+    const unsubscribeEarned = rewarded.addAdEventListener(
+      RewardedAdEventType.EARNED_REWARD,
+      (reward) => {
+        console.log("User earned reward of ", reward);
+        setImageNo(3);
+
+        setTimeout(() => {
+          Toast.success("Reward earned!, you can add up to 4 sample images");
+        }, 5000);
+
+        // Give the reward to user here
+      }
+    );
+
+    rewarded.load();
+
+    // Clean up listeners on unmount
+    return () => {
+      unsubscribeLoaded();
+      unsubscribeEarned();
+    };
+  }, []);
+
+  const handleWatchAd = () => {
+    // rewarded.show();
+    if (isReward && rewarded.loaded) {
+      rewarded.show();
+    } else {
+      console.log("Rewarded ad not loaded yet,try again");
+      Toast.info("Rewarded ad not loaded yet, please try again");
     }
-    return url;
   };
 
-  // Example
-  // const cleanFacebook = normalizeURL(facebook);
+  const formatLinkOnBlur = (key, form, setForm) => {
+    if (form[key] && !/^https?:\/\//i.test(form[key])) {
+      setForm({ ...form, [key]: `https://${form[key]}` });
+    }
+  };
 
   return (
-    <SafeAreaView style={styles.container}>
-      <ScrollView style={styles.container}>
-        <View>
-          <Text style={styles.header}>Add Business</Text>
-          <Text style={styles.message}>
-            Fill Out This Details In Order TO Add business
-          </Text>
-        </View>
-        <TouchableOpacity onPress={() => pickImage(setBusinessImage)}>
-          {businessImage ? (
-            <Image
-              source={{ uri: businessImage }}
-              style={{ width: 100, height: 100, borderRadius: 10 }}
-            />
-          ) : (
-            <AntDesign name="camera" size={100} color={Colors.border} />
-          )}
-        </TouchableOpacity>
-
-        <View style={styles.holdInputs}>
-          <TextInput
-            keyboardType="name-phone-pad"
-            style={styles.input}
-            placeholder="Name Of Business"
-            value={form.name}
-            onChangeText={(val) => setForm({ ...form, name: val })}
-          />
-          <DropDown
-            header={"Select categeory"}
-            selected={selectedCat}
-            setSelected={handleCategoryChange}
-            array={categories}
-            background={Colors.card}
-            textColor={Colors.textPrimary}
-          />
-          <DropDown
-            header={"Select Location"}
-            selected={selectedLocation}
-            setSelected={handleLocationChange}
-            array={locationList}
-            background={Colors.card}
-            textColor={Colors.textPrimary}
-          />
-          <TextInput
-            style={styles.input}
-            placeholder="Business Address"
-            value={form.address}
-            onChangeText={(val) => setForm({ ...form, address: val })}
-          />
-          <TextInput
-            keyboardType="number-pad"
-            style={styles.input}
-            placeholder="phone"
-            value={form.phone}
-            onChangeText={(val) => setForm({ ...form, phone: val })}
-          />
-          <TextInput
-            style={styles.input}
-            keyboardType="number-pad"
-            placeholder="WhatsApp number (nigeria)"
-            value={form.whatsapp}
-            onChangeText={(val) => setForm({ ...form, whatsapp: val })}
-          />
-          <TextInput
-            style={styles.input}
-            keyboardType="url"
-            placeholder="FaceBook"
-            value={form.facebook}
-            onChangeText={(val) => setForm({ ...form, facebook: val })}
-            onBlur={() => {
-              if (form.facebook && !/^https?:\/\//i.test(form.facebook)) {
-                setForm({ ...form, facebook: `https://${form.facebook}` });
-              }
-            }}
-          />
-          <TextInput
-            style={styles.input}
-            placeholder="Businness Web site"
-            keyboardType="url"
-            value={form.website}
-            onChangeText={(val) =>
-              setForm({ ...form, website: normalizeURL(val) })
-            }
-          />
-          <TextInput
-            style={styles.input}
-            keyboardType="twitter"
-            placeholder="Twiiter/X Handle"
-            value={form.twitter}
-            onChangeText={(val) => setForm({ ...form, twitter: val })}
-          />
-          <TextInput
-            multiline
-            style={styles.input}
-            placeholder="About Business"
-            value={form.about}
-            onChangeText={(val) => setForm({ ...form, about: val })}
-          />
-        </View>
-        <Text
-          style={{
-            fontSize: Typography.fontSize.lg,
-            fontWeight: "bold",
-            color: Colors.textPrimary,
-            paddingVertical: 10,
-          }}
-        >
-          Add Product Samples
-        </Text>
-        <TouchableOpacity onPress={() => pickImage(setSampleImages, true)}>
-          <MaterialCommunityIcons
-            name="camera-plus"
-            size={60}
-            color={Colors.border}
-          />
-        </TouchableOpacity>
-        <View style={styles.holdSamples}>
-          {sampleImages.map((uri, index) => (
-            <View key={index} style={{ position: "relative" }}>
-              <Image
-                source={{ uri }}
-                style={{ width: 100, height: 100, borderRadius: 10 }}
-              />
-              <Pressable
-                onPress={() => removeSampleImage(index)}
-                style={{
-                  display: "flex",
-                  justifyContent: "center",
-                  alignItems: "center",
-                  position: "absolute",
-                  top: -5,
-                  right: -5,
-                  backgroundColor: "red",
-                  borderRadius: 10,
-                  padding: 2,
-                  height: 20,
-                  width: 20,
-                }}
-              >
-                <Text
-                  style={{
-                    color: "white",
-                    fontWeight: "bold",
-                    display: "flex",
-                    textAlign: "center",
-                  }}
-                >
-                  X
-                </Text>
-              </Pressable>
+    <>
+      {loading ? (
+        <ActivityIndicator
+          style={{ flex: 1, width: "100%", backgroundColor: Colors.background }}
+          size="large"
+          color={Colors.primary}
+        />
+      ) : (
+        <SafeAreaView style={styles.container}>
+          <ScrollView style={styles.container}>
+            <View>
+              <Text style={styles.header}>Add Business</Text>
+              <Text style={styles.message}>
+                Fill Out This Details In Order To Add business
+              </Text>
             </View>
-          ))}
-        </View>
+            <TouchableOpacity onPress={() => pickImage(setBusinessImage)}>
+              {businessImage ? (
+                <Image
+                  source={{ uri: businessImage }}
+                  style={{ width: 100, height: 100, borderRadius: 10 }}
+                />
+              ) : (
+                <AntDesign name="camera" size={100} color={Colors.border} />
+              )}
+            </TouchableOpacity>
+            <View style={styles.holdInputs}>
+              <TextInput
+                keyboardType="name-phone-pad"
+                style={styles.input}
+                placeholder="Name Of Business"
+                placeholderTextColor={Colors.textPrimary}
+                value={form.name}
+                onChangeText={(val) => setForm({ ...form, name: val })}
+              />
+              <DropDown
+                header={"Select categeory"}
+                selected={selectedCat}
+                setSelected={handleCategoryChange}
+                array={categories}
+                background={Colors.card}
+                textColor={Colors.textPrimary}
+              />
+              <DropDown
+                header={"Select Location"}
+                selected={selectedLocation}
+                setSelected={handleLocationChange}
+                array={locationList}
+                background={Colors.card}
+                textColor={Colors.textPrimary}
+              />
+              <TextInput
+                style={styles.input}
+                placeholder="Business Address"
+                placeholderTextColor={Colors.textPrimary}
+                value={form.address}
+                onChangeText={(val) => setForm({ ...form, address: val })}
+              />
+              <TextInput
+                keyboardType="number-pad"
+                style={styles.input}
+                placeholder="Phone"
+                placeholderTextColor={Colors.textPrimary}
+                value={form.phone}
+                onChangeText={(val) => setForm({ ...form, phone: val })}
+              />
+              <TextInput
+                style={styles.input}
+                keyboardType="number-pad"
+                placeholder="WhatsApp number - Nigeria (optional)"
+                placeholderTextColor={Colors.textPrimary}
+                value={form.whatsapp}
+                onChangeText={(val) => setForm({ ...form, whatsapp: val })}
+              />
+              <TextInput
+                style={styles.input}
+                keyboardType="url"
+                placeholder="FaceBook (optional)"
+                placeholderTextColor={Colors.textPrimary}
+                value={form.facebook}
+                onChangeText={(val) => setForm({ ...form, facebook: val })}
+                onBlur={() => formatLinkOnBlur("facebook", form, setForm)}
+              />
+              <TextInput
+                style={styles.input}
+                placeholder="Businness Web site (optional)"
+                placeholderTextColor={Colors.textPrimary}
+                keyboardType="url"
+                value={form.website}
+                onChangeText={(val) => setForm({ ...form, website: val })}
+                onBlur={() => formatLinkOnBlur("website", form, setForm)}
+              />
+              <TextInput
+                style={styles.input}
+                keyboardType="twitter"
+                placeholder="Twiiter/X Handle (optional)"
+                placeholderTextColor={Colors.textPrimary}
+                value={form.twitter}
+                onChangeText={(val) => setForm({ ...form, twitter: val })}
+                onBlur={() => formatLinkOnBlur("twitter", form, setForm)}
+              />
+              <TextInput
+                multiline
+                style={styles.aboutBox}
+                placeholder="About Business"
+                placeholderTextColor={Colors.textPrimary}
+                value={form.about}
+                numberOfLines={4}
+                onChangeText={(val) => setForm({ ...form, about: val })}
+              />
+            </View>
+            <Text
+              style={{
+                fontSize: Typography.fontSize.lg,
+                fontWeight: "bold",
+                color: Colors.textPrimary,
+                paddingVertical: 10,
+              }}
+            >
+              Add Business Image Samples
+            </Text>
+            <TouchableOpacity onPress={() => pickImage(setSampleImages, true)}>
+              <MaterialCommunityIcons
+                name="camera-plus"
+                size={60}
+                color={Colors.border}
+              />
+            </TouchableOpacity>
+            <View style={styles.holdSamples}>
+              {sampleImages.map((uri, index) => (
+                <View key={index} style={{ position: "relative" }}>
+                  <Image
+                    source={{ uri }}
+                    style={{ width: 100, height: 100, borderRadius: 10 }}
+                  />
+                  <Pressable
+                    onPress={() => removeSampleImage(index)}
+                    style={{
+                      display: "flex",
+                      justifyContent: "center",
+                      alignItems: "center",
+                      position: "absolute",
+                      top: -5,
+                      right: -5,
+                      backgroundColor: "red",
+                      borderRadius: 10,
+                      padding: 2,
+                      height: 20,
+                      width: 20,
+                    }}
+                  >
+                    <Text
+                      style={{
+                        color: "white",
+                        fontWeight: "bold",
+                        display: "flex",
+                        textAlign: "center",
+                      }}
+                    >
+                      X
+                    </Text>
+                  </Pressable>
+                </View>
+              ))}
+            </View>
 
-        {/* <Button  title="Submit" /> */}
-        <Pressable onPress={handleSubmit}>
-          <Text
-            style={{
-              backgroundColor: Colors.secondary,
-              color: Colors.white,
-              borderRadius: 5,
-              padding: 10,
-              width: "100%",
-              textAlign: "center",
-              marginVertical: 10,
-            }}
-          >
-            Submit
-          </Text>
-        </Pressable>
-      </ScrollView>
-      <ToastManager />
-    </SafeAreaView>
+            <TouchableOpacity style={Button.button} onPress={handleSubmit}>
+              <Text style={Button.buttonText}>Submit</Text>
+            </TouchableOpacity>
+            {!isReward && (
+              <TouchableOpacity style={Button.button} onPress={handleWatchAd}>
+                <Text style={Button.buttonText}>
+                  🎁 Watch Ad for Reward 🎁 (add up 4 sample images)
+                </Text>
+              </TouchableOpacity>
+            )}
+          </ScrollView>
+          <ToastManager />
+        </SafeAreaView>
+      )}
+    </>
   );
 }

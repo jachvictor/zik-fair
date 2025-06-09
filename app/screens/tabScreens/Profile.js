@@ -5,23 +5,37 @@ import {
   FlatList,
   StyleSheet,
   TouchableOpacity,
+  ActivityIndicator,
 } from "react-native";
 import React, { useEffect, useState } from "react";
 import MaterialCommunityIcons from "@expo/vector-icons/MaterialCommunityIcons";
 import Ionicons from "@expo/vector-icons/Ionicons";
 import MaterialIcons from "@expo/vector-icons/MaterialIcons";
 import Feather from "@expo/vector-icons/Feather";
-import { useNavigation } from "@react-navigation/native";
+import { useIsFocused, useNavigation } from "@react-navigation/native";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useAppContext } from "../../context/AppContext";
-// import ToastManager, { Toast } from "toastify-react-native";
+import ToastManager, { Toast } from "toastify-react-native";
 import { useTheme } from "../../context/ThemeContext";
+import {
+  BannerAd,
+  BannerAdSize,
+  TestIds,
+} from "react-native-google-mobile-ads";
 
 export default function Profile() {
   const { Colors, Typography } = useTheme();
-  const { setLoading } = useAppContext();
+  // const { setLoading } = useAppContext();\
+  const { isNonPersonalized, adReady } = useAppContext();
+  const focused = useIsFocused();
+
+  const [loading, setLoading] = useState(false);
   const { navigate } = useNavigation();
   const [user, setUser] = useState(null);
+  const tabsBannerId = __DEV__
+    ? TestIds.BANNER
+    : "ca-app-pub-7487058490506362/3407237828";
+
   const styles = StyleSheet.create({
     constainer: {
       flex: 1,
@@ -84,6 +98,25 @@ export default function Profile() {
       justifyContent: "space-between", // Evenly spaces items in a row
       marginBottom: 10,
     },
+    profileIcon: {
+      display: "flex",
+      alignItems: "center",
+      justifyContent: "center",
+      height: 100,
+      width: 100,
+      borderRadius: 50,
+      borderColor: "white",
+      borderWidth: 2,
+      backgroundColor: Colors.accent,
+    },
+
+    profileIconText: {
+      display: "flex",
+      fontSize: 50,
+      color: "white",
+      textAlign: "center",
+      textAlignVertical: "center",
+    },
   });
 
   const data = [
@@ -106,31 +139,38 @@ export default function Profile() {
     };
     // console.log(formData);
     try {
-      const response = await fetch("http://localhost:5000/api/auth/logout", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(formData),
-      });
+      const response = await fetch(
+        "https://zikfair.onrender.com/api/auth/logout",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(formData),
+        }
+      );
 
       const resData = await response.json();
-      console.log("respone", resData);
+      // console.log("respone", resData);
       if (response.ok) {
         setLoading(false);
-        // Toast.success(resData.message);
+        setUser(null);
         await AsyncStorage.removeItem("user");
+        Toast.success(resData.message);
+
         setTimeout(() => {
           navigate("Login");
-        }, 1000);
+        }, 2000);
       } else {
         setLoading(false);
-        // Toast.error(resData.message);
+        Toast.error(resData.message);
       }
     } catch (error) {
       setLoading(false);
-      // Toast.error("Error during log out");
+      Toast.error("Error during log out");
       console.error("Error during sign up:", error);
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -182,10 +222,11 @@ export default function Profile() {
     // await AsyncStorage.removeItem("user");
     // const user = JSON.parse(await AsyncStorage.getItem("user"));
     // const user = {};
-    console.log("user", user);
+    // console.log("user", user);
 
     if (type === "add-business") {
       if (user.vendor) {
+        // if (true) {
         navigate("AddBusiness");
       } else {
         navigate("RegisterVendor");
@@ -216,7 +257,7 @@ export default function Profile() {
       try {
         const storedData = await AsyncStorage.getItem("user");
         const parsedUser = storedData ? JSON.parse(storedData) : null;
-        console.log("Fetched User:", parsedUser);
+        // console.log("Fetched User:", parsedUser);
         setUser(parsedUser);
       } catch (error) {
         console.error("Error fetching user:", error);
@@ -224,23 +265,47 @@ export default function Profile() {
     };
 
     fetchUser();
-  }, []);
+  }, [focused]);
   return (
-    <SafeAreaView style={styles.constainer}>
-      <View style={styles.accountInfo}>
-        <Text style={styles.icon}>{user?.name[0] ?? ""}</Text>
-        <Text style={styles.name}>{user?.name ?? ""}</Text>
-        <Text style={{ color: Colors.textSecondary }}>{user?.email ?? ""}</Text>
-      </View>
-      <FlatList
-        style={{ width: "100%", padding: 16 }}
-        data={data}
-        renderItem={renderItem}
-        keyExtractor={(item) => item.id}
-        numColumns={2} // Specifies 2 columns
-        columnWrapperStyle={styles.row} // Styles each row
-      />
-      {/* <ToastManager /> */}
-    </SafeAreaView>
+    <>
+      {loading ? (
+        <ActivityIndicator
+          style={{ flex: 1, width: "100%", backgroundColor: Colors.background }}
+          size="large"
+          color={Colors.primary}
+        />
+      ) : (
+        <SafeAreaView style={styles.constainer}>
+          <View style={styles.accountInfo}>
+            <View style={styles.profileIcon}>
+              <Text style={styles.profileIconText}>{user?.name[0] ?? ""}</Text>
+            </View>
+            <Text style={styles.name}>{user?.name ?? ""}</Text>
+            <Text style={{ color: Colors.textSecondary }}>
+              {user?.email ?? ""}
+            </Text>
+          </View>
+          <FlatList
+            style={{ width: "100%", padding: 16 }}
+            data={data}
+            renderItem={renderItem}
+            keyExtractor={(item) => item.id}
+            numColumns={2} // Specifies 2 columns
+            columnWrapperStyle={styles.row} // Styles each row
+          />
+          {/* <ToastManager /> */}
+        </SafeAreaView>
+      )}
+      {adReady && (
+        <BannerAd
+          unitId={tabsBannerId}
+          size={BannerAdSize.FULL_BANNER}
+          requestOptions={{
+            requestNonPersonalizedAdsOnly: isNonPersonalized, // use from context
+          }}
+        />
+      )}
+      <ToastManager />
+    </>
   );
 }

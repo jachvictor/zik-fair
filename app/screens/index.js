@@ -16,6 +16,10 @@ import Login from "./authScreens/Login";
 import VerifyEmail from "./authScreens/VerifyEmail";
 import ForgotPass from "./authScreens/ForgotPass";
 import ResetPass from "./authScreens/ResetPass";
+import AboutScreen from "./businessScreens/About";
+import PrivacyPolicyScreen from "./businessScreens/PrivacyPolicy";
+import TermsOfUseScreen from "./businessScreens/TermsOfUse";
+import ContactUsScreen from "./businessScreens/ContactUs";
 export {
   Welcome,
   Favorite,
@@ -35,4 +39,8 @@ export {
   VerifyEmail,
   ForgotPass,
   ResetPass,
+  AboutScreen,
+  PrivacyPolicyScreen,
+  TermsOfUseScreen,
+  ContactUsScreen,
 };

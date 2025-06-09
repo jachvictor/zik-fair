@@ -30,7 +30,8 @@ export default function PopUp({ message, handleNo, handleYes }) {
       height: "auto",
       backgroundColor: Colors.card,
       gap: 30,
-      zIndex: "10rem",
+      // zIndex: "10rem",
+      borderRadius: 10,
       borderWidth: 1,
       borderColor: Colors.border,
     },
@@ -43,7 +44,7 @@ export default function PopUp({ message, handleNo, handleYes }) {
     buttonDanger: {
       backgroundColor: Colors.danger,
       borderRadius: 5,
-      paddingVertical: 12,
+      padding: 10,
       paddingHorizontal: 20,
       width: "fit",
       alignItems: "center",

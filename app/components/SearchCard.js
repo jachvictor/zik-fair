@@ -1,9 +1,23 @@
-import { StyleSheet, Text, View, Image, Pressable } from "react-native";
+import {
+  StyleSheet,
+  Text,
+  View,
+  Image,
+  Pressable,
+  TouchableOpacity,
+  ScrollView,
+} from "react-native";
 import React from "react";
 import Ionicons from "@expo/vector-icons/Ionicons";
 // import { Colors, Typography } from "../styles";
 import { useTheme } from "../context/ThemeContext";
-export default function SearchCard({ source, name, address, onPress }) {
+export default function SearchCard({
+  source,
+  name,
+  address,
+  onPress,
+  onAddFav,
+}) {
   const { Colors, Typography } = useTheme();
   const styles = StyleSheet.create({
     container: {
@@ -32,13 +46,22 @@ export default function SearchCard({ source, name, address, onPress }) {
   });
 
   return (
-    <View >
-      <Pressable style={styles.container} onPress={onPress}>
+    <View>
+      <TouchableOpacity style={styles.container} onPress={onPress}>
         <Image style={styles.image} source={source} />
+      </TouchableOpacity>
+      <ScrollView horizontal>
         <Text style={styles.name}>{name}</Text>
+      </ScrollView>
+      <ScrollView horizontal>
         <Text style={styles.address}>{address}</Text>
-        <Ionicons size={24} color={Colors.secondary} name="heart" />
-      </Pressable>
+      </ScrollView>
+      <Ionicons
+        size={24}
+        color={Colors.secondary}
+        onPress={onAddFav}
+        name="heart"
+      />
     </View>
   );
 }

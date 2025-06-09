@@ -12,6 +12,11 @@ import { useTheme } from "../context/ThemeContext";
 import { Input, Button } from "../styles";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import ToastManager, { Toast } from "toastify-react-native";
+import {
+  AdEventType,
+  InterstitialAd,
+  TestIds,
+} from "react-native-google-mobile-ads";
 
 export default function Review({ onChange, setLoading, id, handleFetch }) {
   const { Colors, Typography } = useTheme();
@@ -58,8 +63,8 @@ export default function Review({ onChange, setLoading, id, handleFetch }) {
       width: "100%",
       // height: 100,
       borderRadius: 10,
-      borderColor: "silver",
-      borderWidth: 2,
+      borderColor: Colors.border,
+      borderWidth: 1,
       color: Colors.textPrimary,
       padding: 8,
       // display: "flex",
@@ -82,10 +87,33 @@ export default function Review({ onChange, setLoading, id, handleFetch }) {
     }
   };
 
+  const formInterstitialId = __DEV__
+    ? TestIds.INTERSTITIAL
+    : "ca-app-pub-7487058490506362/3983621192";
+  const interstitial = InterstitialAd.createForAdRequest(formInterstitialId);
+
+  const showInterstitialAd = () => {
+    const unsubscribe = interstitial.addAdEventListener(
+      AdEventType.LOADED,
+      () => {
+        interstitial.show();
+      }
+    );
+
+    interstitial.load();
+
+    // Optional: Handle ad errors
+    interstitial.addAdEventListener(AdEventType.ERROR, (error) => {
+      console.warn("Interstitial ad failed to load:", error);
+    });
+
+    return () => unsubscribe();
+  };
+
   const handleComment = async () => {
     const storedData = await AsyncStorage.getItem("user");
     const parsedUser = storedData ? JSON.parse(storedData) : {};
-    console.log("Fetched User2:", parsedUser);
+    // console.log("Fetched User2:", parsedUser);
     if (comment === "") {
       return Toast.warn("write a comment");
     } else if (rate < 1) {
@@ -100,7 +128,7 @@ export default function Review({ onChange, setLoading, id, handleFetch }) {
     };
     try {
       const response = await fetch(
-        `http://localhost:5000/api/business/add-comment/${id}`,
+        `https://zikfair.onrender.com/api/business/add-comment/${id}`,
         {
           method: "POST",
           headers: {
@@ -111,23 +139,26 @@ export default function Review({ onChange, setLoading, id, handleFetch }) {
       );
 
       const resData = await response.json();
-      console.log("response", resData);
+      // console.log("response", resData);
 
       if (response.ok) {
         setLoading(false);
         handleFetch();
         Toast.success(resData.message);
-
+        showInterstitialAd();
         // Here, extract businesses and set it to the state
         // Update this line to get the 'businesses' array
       } else {
         setLoading(false);
         Toast.error(resData.message);
+        showInterstitialAd();
       }
     } catch (error) {
       setLoading(false);
-      console.error("Error during fetch:", error);
-      Toast.error("Error during fetch");
+      console.error("An error occurred:", error);
+      Toast.error("An error occurred. Try again.");
+    } finally {
+      setLoading(true);
     }
   };
 
@@ -166,6 +197,8 @@ export default function Review({ onChange, setLoading, id, handleFetch }) {
         <TextInput
           multiline
           style={styles.commentbox}
+          placeholder="Add Comment"
+          placeholderTextColor={Colors.textSecondary}
           value={comment}
           numberOfLines={4}
           onChangeText={(text) => setComment(text)}

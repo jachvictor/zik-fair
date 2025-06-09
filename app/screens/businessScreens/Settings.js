@@ -7,6 +7,7 @@ import {
   TouchableOpacity,
   View,
   ActivityIndicator,
+  Share,
 } from "react-native";
 import { PopUp, EditProfile } from "../../components";
 import React, { useState } from "react";
@@ -18,12 +19,23 @@ import Feather from "@expo/vector-icons/Feather";
 // import MaterialCommunityIcons from "@expo/vector-icons/MaterialCommunityIcons";
 import { useTheme } from "../../context/ThemeContext";
 import ToastManager, { Toast } from "toastify-react-native";
+import { useNavigation } from "@react-navigation/native";
 
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import { useAppContext } from "../../context/AppContext";
+import {
+  BannerAd,
+  BannerAdSize,
+  TestIds,
+} from "react-native-google-mobile-ads";
 export default function Settings() {
   const { Colors, Typography } = useTheme();
+  const { isNonPersonalized, adReady } = useAppContext();
+
   const [loading, setLoading] = useState(false);
   const [popup, setPopup] = useState(false);
+  const [isPopup, setIsPopup] = useState(false);
+  const { navigate } = useNavigation();
   const styles = StyleSheet.create({
     container: {
       flex: 1,
@@ -54,66 +66,25 @@ export default function Settings() {
   const handleToggle = () => {
     try {
       toggleTheme();
-      console.log("ggggggg");
     } catch (error) {
       console.error("error theme:", error);
-    }
-  };
-  const handleDelete = async (id) => {
-    const storedData = await AsyncStorage.getItem("user");
-    const parsedUser = storedData ? JSON.parse(storedData) : {};
-    console.log("Fetched User2:", parsedUser);
-    setPopup(false);
-    setLoading(true);
-
-    try {
-      const response = await fetch(
-        `http://localhost:5000/api/business/delete-businesses/${parsedUser._id}`,
-        {
-          method: "DELETE",
-          headers: {
-            "Content-Type": "application/json",
-          },
-        }
-      );
-
-      const resData = await response.json();
-      console.log("response", resData);
-
-      if (response.ok) {
-        setLoading(false);
-        Toast.success(resData.message);
-
-        // Here, extract businesses and set it to the state
-        // Update this line to get the 'businesses' array
-      } else {
-        setLoading(false);
-        Toast.error(resData.message);
-      }
-    } catch (error) {
-      setLoading(false);
-      console.error("Error during fetch:", error);
-      Toast.error("Error during fetch");
     }
   };
 
   const handleDeleteAccount = async () => {
     const storedData = await AsyncStorage.getItem("user");
     const parsedUser = storedData ? JSON.parse(storedData) : {};
-    if (!user?._id)
+    if (!parsedUser._id)
       return Toast.warn("An error occurred, try logging in again");
 
-    const confirm = window.confirm(
-      "Are you sure you want to delete your account and all data?"
-    );
-    if (!confirm) return;
-
+    setIsPopup(false);
+    const formData = { userId: parsedUser._id };
     try {
       setLoading(true);
 
       // Step 1: Delete all businesses by user
       const deleteBusinessesRes = await fetch(
-        `http://localhost:5000/api/business/delete-businesses/${parsedUser._id}`,
+        `https://zikfair.onrender.com/api/business/delete-businesses/${parsedUser._id}`,
         {
           method: "DELETE",
           headers: {
@@ -125,12 +96,13 @@ export default function Settings() {
       if (resData.success) {
         // Step 2: Delete user account
         const deleteUserRes = await fetch(
-          `http://localhost:5000/api/business/delete-businesses/${parsedUser._id}`,
+          `https://zikfair.onrender.com/api/auth/delete-account`,
           {
             method: "DELETE",
             headers: {
               "Content-Type": "application/json",
             },
+            body: JSON.stringify(formData),
           }
         );
 
@@ -138,7 +110,7 @@ export default function Settings() {
           await AsyncStorage.removeItem("user");
           Toast.success("Account and all data deleted");
           setTimeout(() => {
-            navigation.navigate("Login");
+            navigate("Signup");
           }, 2000); // or landing screen
         } else {
           Toast.error("Failed to delete user account");
@@ -153,12 +125,39 @@ export default function Settings() {
       setLoading(false);
     }
   };
+  const handleShareApp = async () => {
+    try {
+      const result = await Share.share({
+        title: "Check out this app!",
+        message:
+          "Hey! Check out this awesome UNIZIK Business Directory app: https://play.google.com/store/apps/details?id=com.yourappname", // Replace with your app's link
+        url: "https://play.google.com/store/apps/details?id=com.yourappname", // Optional for iOS
+      });
+
+      if (result.action === Share.sharedAction) {
+        if (result.activityType) {
+          // Shared with activity type
+          console.log("Shared with activity type: ", result.activityType);
+        } else {
+          console.log("App shared successfully");
+        }
+      } else if (result.action === Share.dismissedAction) {
+        console.log("Share dismissed");
+      }
+    } catch (error) {
+      console.error("Error sharing the app:", error.message);
+    }
+  };
+
+  const inScreenBannerId = __DEV__
+    ? TestIds.BANNER
+    : "ca-app-pub-7487058490506362/7738903496";
 
   return (
     <>
       {loading ? (
         <ActivityIndicator
-          style={{ height: "100%", width: "100%" }}
+          style={{ flex: 1, width: "100%", backgroundColor: Colors.background }}
           size="large"
           color={Colors.primary}
         />
@@ -166,7 +165,7 @@ export default function Settings() {
         <SafeAreaView style={styles.container}>
           <ScrollView>
             <View style={styles.container}>
-              <TouchableOpacity style={styles.card}>
+              <TouchableOpacity style={styles.card} onPress={handleToggle}>
                 <MaterialCommunityIcons
                   name="theme-light-dark"
                   size={24}
@@ -175,12 +174,7 @@ export default function Settings() {
                 <Text style={styles.text}>Theme</Text>
                 <View>
                   {mode === "light" ? (
-                    <Feather
-                      name="sun"
-                      size={24}
-                      color="yellow"
-                      onPress={handleToggle}
-                    />
+                    <Feather name="sun" size={24} color="yellow" />
                   ) : (
                     <Feather
                       name="moon"
@@ -191,40 +185,46 @@ export default function Settings() {
                   )}
                 </View>
               </TouchableOpacity>
-              <TouchableOpacity style={styles.card}>
+              <TouchableOpacity style={styles.card} onPress={handleShareApp}>
                 <Entypo name="share" size={24} color="green" />
                 <Text style={styles.text}>Share</Text>
               </TouchableOpacity>
-              <TouchableOpacity style={styles.card}>
+              <TouchableOpacity
+                style={styles.card}
+                onPress={() => navigate("About")}
+              >
                 <AntDesign name="questioncircleo" size={24} color="yellow" />
                 <Text style={styles.text}>About App</Text>
               </TouchableOpacity>
-              <TouchableOpacity style={styles.card}>
+              <TouchableOpacity
+                style={styles.card}
+                onPress={() => setIsPopup(true)}
+              >
                 <AntDesign name="deleteuser" size={24} color={Colors.danger} />
                 <Text style={styles.text}>Delete Account</Text>
               </TouchableOpacity>
-              <TouchableOpacity
-                style={styles.card}
-                onPress={() => setPopup(true)}
-              >
-                <MaterialCommunityIcons
-                  name="google-my-business"
-                  size={24}
-                  color={Colors.danger}
-                />
-                <Text style={styles.text}>Delete My Businesses</Text>
-              </TouchableOpacity>
+
               <EditProfile loading={loading} setLoading={setLoading} />
             </View>
-            {popup && (
-              <PopUp
-                handleNo={() => setPopup(false)}
-                handleYes={handleDelete}
-              />
-            )}
           </ScrollView>
         </SafeAreaView>
-      )}{" "}
+      )}
+      {isPopup && (
+        <PopUp
+          handleNo={() => setIsPopup(false)}
+          handleYes={handleDeleteAccount}
+          message={"Are you sure you want to delete your account and all data"}
+        />
+      )}
+      {adReady && (
+        <BannerAd
+          unitId={inScreenBannerId}
+          size={BannerAdSize.FULL_BANNER}
+          requestOptions={{
+            requestNonPersonalizedAdsOnly: isNonPersonalized,
+          }}
+        />
+      )}
       <ToastManager />
     </>
   );

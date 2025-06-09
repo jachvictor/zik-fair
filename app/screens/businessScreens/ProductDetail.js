@@ -32,7 +32,13 @@ import { useEffect, useState } from "react";
 import { useReducer } from "react";
 import { Linking } from "react-native";
 import FontAwesome6 from "@expo/vector-icons/FontAwesome6";
-// import { Toast as Toast1 } from "react-native-toast-message";
+import {
+  InterstitialAd,
+  AdEventType,
+  TestIds,
+  BannerAd,
+  BannerAdSize,
+} from "react-native-google-mobile-ads";
 
 const convertToInternational = (localNumber) => {
   if (localNumber.startsWith("0")) {
@@ -44,6 +50,7 @@ const convertToInternational = (localNumber) => {
 export default function ProductDetail({ route }) {
   const { id } = route.params || {};
   const { Colors, Typography } = useTheme();
+  const { isNonPersonalized, adReady } = useAppContext();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(false);
   const [business, setBusiness] = useState({});
@@ -290,23 +297,17 @@ export default function ProductDetail({ route }) {
     const total = comments.reduce((sum, c) => sum + (c.rating || 0), 0);
     return (total / comments.length).toFixed(1); // e.g., "4.3"
   };
-  const processBusinesses = (list = []) => {
-    return list.map((biz) => ({
-      ...biz,
-      averageRating: calculateAverageRating(biz.comments),
-    }));
-  };
 
   const handleDeleteComment = async () => {
     const storedData = await AsyncStorage.getItem("user");
     const parsedUser = storedData ? JSON.parse(storedData) : {};
-    console.log("Fetched User2:", parsedUser);
+    // console.log("Fetched User2:", parsedUser);
     setIsPopup(false);
     setLoading(true);
 
     try {
       const response = await fetch(
-        `http://localhost:5000/api/business/delete-comment`,
+        `https://zikfair.onrender.com/api/business/delete-comment`,
         {
           method: "DELETE",
           headers: {
@@ -319,7 +320,7 @@ export default function ProductDetail({ route }) {
         }
       );
       const resData = await response.json();
-      console.log("business", resData);
+      // console.log("business", resData);
 
       if (response.ok) {
         Toast.success(resData.message);
@@ -334,19 +335,23 @@ export default function ProductDetail({ route }) {
       setLoading(false);
     }
   };
+  // const destroy = "";
   const handleFetch = async () => {
     const storedData = await AsyncStorage.getItem("user");
     const parsedUser = storedData ? JSON.parse(storedData) : {};
-    console.log("Fetched User2:", parsedUser);
+    // console.log("Fetched User2:", parsedUser);
+    setError(false);
     setLoading(true);
     try {
-      const response = await fetch(`http://localhost:5000/api/business/${id}`);
+      const response = await fetch(
+        `https://zikfair.onrender.com/api/business/${id}`
+      );
       const resData = await response.json();
-      console.log("business", resData);
+      // console.log("business", resData);
 
       if (response.ok) {
+        setError(false);
         setBusiness(resData.business); // 👈 corrected here
-
         // setBusiness(processBusinesses(resData.business));
         const avgRating = calculateAverageRating(resData.business.comments);
         setRating(avgRating);
@@ -359,21 +364,28 @@ export default function ProductDetail({ route }) {
 
         setUserComment(userComm);
         setComment(comm);
+        const count = await AsyncStorage.getItem("adCount");
+        console.log("adcount", count);
+        await AsyncStorage.setItem("adCount", (parseInt(count) + 1).toString());
         Toast.success(resData.message);
       } else {
+        setError(true);
         Toast.error(resData.message);
       }
     } catch (error) {
+      setError(true);
       console.error("Error during fetch:", error);
       Toast.error("Error during fetch");
     } finally {
       setLoading(false);
     }
   };
+
   useEffect(() => {
     handleFetch();
     // if (id) handleFetch();
   }, []); // 👈 include id in dependencies
+
   const renderComments = ({ item }) => {
     return <Comments user={false} comments={item} />;
   };
@@ -381,7 +393,7 @@ export default function ProductDetail({ route }) {
     return (
       <View>
         <Comments user={true} comments={item} />
-        <View style={{ paddingHorizontal: 10 }}>
+        <View style={{ paddingLeft: 40, paddingVertical: 10 }}>
           <AntDesign
             name="delete"
             size={20}
@@ -392,12 +404,98 @@ export default function ProductDetail({ route }) {
       </View>
     );
   };
+  const handleAddToFav = async (id) => {
+    const storedData = await AsyncStorage.getItem("user");
+    const parsedUser = storedData ? JSON.parse(storedData) : {};
+
+    setLoading(true);
+    const formData = {
+      userId: parsedUser._id,
+      businessId: id,
+    };
+    try {
+      const response = await fetch(
+        `https://zikfair.onrender.com/api/business/add-favorite`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(formData),
+        }
+      );
+
+      const resData = await response.json();
+      // console.log("response", resData);
+
+      if (response.ok) {
+        setLoading(false);
+        handleFetch();
+        Toast.success(resData.message);
+
+        // Here, extract businesses and set it to the state
+        // Update this line to get the 'businesses' array
+      } else {
+        setLoading(false);
+        Toast.error(resData.message);
+      }
+    } catch (error) {
+      setLoading(false);
+      console.error("Error during fetch:", error);
+      Toast.error("Error during fetch");
+    } finally {
+      setLoading(false);
+    }
+  };
+  const inScreenInterstitialId = __DEV__
+    ? TestIds.INTERSTITIAL
+    : "ca-app-pub-7487058490506362/2604543614";
+
+  const inScreenBannerId = __DEV__
+    ? TestIds.BANNER
+    : "ca-app-pub-7487058490506362/7738903496";
+
+  const interstitial = InterstitialAd.createForAdRequest(
+    inScreenInterstitialId,
+    {
+      requestNonPersonalizedAdsOnly: isNonPersonalized,
+    }
+  );
+
+  useEffect(() => {
+    const showAdIfNeeded = async () => {
+      try {
+        const count = await AsyncStorage.getItem("adCount");
+        const newCount = parseInt(count);
+        console.log("adcount2", newCount);
+
+        await AsyncStorage.setItem("adCount", newCount.toString());
+
+        // Show ad only every 5th time
+        if (newCount % 3 === 0) {
+          interstitial.load();
+        }
+      } catch (error) {
+        console.error("Error checking ad count:", error);
+      }
+    };
+
+    const unsubscribe = interstitial.addAdEventListener(
+      AdEventType.LOADED,
+      () => interstitial.show()
+    );
+
+    showAdIfNeeded();
+
+    return () => unsubscribe();
+  }, []);
+
   return (
     <SafeAreaView style={styles.container}>
       {!loading ? (
         <>
-          {!business ? (
-            <ErrorScreen />
+          {error ? (
+            <ErrorScreen handleFetch={handleFetch} />
           ) : (
             <ScrollView style={styles.scroll}>
               <Image
@@ -419,12 +517,21 @@ export default function ProductDetail({ route }) {
                   padding: 10,
                 }}
               >
-                <Ionicons size={24} color={Colors.secondary} name="heart" />
+                <Ionicons
+                  size={24}
+                  color={Colors.secondary}
+                  onPress={() => handleAddToFav(business._id)}
+                  name="heart"
+                />
               </View>
               <View style={styles.productContent}>
                 <View style={styles.holdName}>
                   <Text style={styles.name}>{business.name}</Text>
-                  <Text style={styles.address}>{business.address}</Text>
+                  <Text style={styles.address}>
+                    {business.location == "others"
+                      ? business.address
+                      : business.location}
+                  </Text>
                 </View>
                 <View style={styles.holdRating}>
                   <View style={styles.rating}>
@@ -441,7 +548,12 @@ export default function ProductDetail({ route }) {
                     {business.category}
                   </Text>
                 </View>
-                <Carousel data={data} renderItem={renderItem} />
+
+                <Carousel
+                  head={"Business Details >"}
+                  data={data}
+                  renderItem={renderItem}
+                />
                 <View style={styles.about}>
                   <Text
                     style={{
@@ -463,6 +575,7 @@ export default function ProductDetail({ route }) {
                     {business.about}
                   </Text>
                 </View>
+
                 <Carousel
                   data={
                     business?.sampleImages?.length > 0
@@ -472,6 +585,15 @@ export default function ProductDetail({ route }) {
                   renderItem={renderItem2}
                   head={"Samples"}
                 />
+                {adReady && (
+                  <BannerAd
+                    unitId={inScreenBannerId}
+                    size={BannerAdSize.MEDIUM_RECTANGLE}
+                    requestOptions={{
+                      requestNonPersonalizedAdsOnly: isNonPersonalized,
+                    }}
+                  />
+                )}
               </View>
               {userComment?.length < 1 && (
                 <Review
@@ -491,12 +613,14 @@ export default function ProductDetail({ route }) {
                       horizontal={false}
                       data={userComment?.length > 0 ? userComment : []}
                       renderItem={renderUserComment}
+                      keyExtractor={(item, index) => index.toString()}
                     />
                     <FlatList
                       showsHorizontalScrollIndicator={false}
                       horizontal={false}
                       data={comment?.length > 0 ? comment : []}
                       renderItem={renderComments}
+                      keyExtractor={(item, index) => index.toString()}
                     />
                   </View>
                 )}
@@ -506,7 +630,7 @@ export default function ProductDetail({ route }) {
         </>
       ) : (
         <ActivityIndicator
-          style={{ height: "100%", width: "100%" }}
+          style={{ flex: 1, width: "100%", backgroundColor: Colors.background }}
           size="large"
           color={Colors.primary}
         />

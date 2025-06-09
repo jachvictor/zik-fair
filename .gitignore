@@ -8,7 +8,11 @@ node_modules/
 dist/
 web-build/
 
-# Native
+# Native (ignore these folders to allow Expo prebuild to manage them)
+android/
+ios/
+
+# Native credentials and keys
 *.orig.*
 *.jks
 *.p8
@@ -33,3 +37,7 @@ yarn-error.*
 
 # typescript
 *.tsbuildinfo
+
+app-example
+android/
+ios/

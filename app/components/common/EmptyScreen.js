@@ -12,19 +12,29 @@ export default function EmptyScreen({ header, message }) {
       alignItems: "center",
       gap: 10,
       padding: 10,
+
+      backgroundColor: Colors.background,
     },
     header: {
       fontSize: Typography.fontSize.lg,
       color: Colors.textPrimary,
+      display: "flex",
+      textAlign: "center",
     },
     message: {
       color: Colors.textSecondary,
+      display: "flex",
+      textAlign: "center",
     },
   });
   return (
     <View style={styles.constainer}>
-      <AntDesign size={200} style={{color:Colors.textSecondary}} name="delete" />
-      <Text style={styles.header}>{header}</Text>
+      <AntDesign
+        size={200}
+        style={{ color: Colors.textSecondary }}
+        name="inbox"
+      />
+      <Text style={styles.header}>Nothing here yet</Text>
       <Text style={styles.message}>{message}</Text>
     </View>
   );

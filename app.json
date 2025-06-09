@@ -1,10 +1,10 @@
 {
   "expo": {
-    "name": "business",
-    "slug": "business",
+    "name": "ZikFair",
+    "slug": "zikfair",
     "version": "1.0.0",
     "orientation": "portrait",
-    "icon": "./assets/icon.png",
+    "icon": "./assets/icon2.png",
     "userInterfaceStyle": "automatic",
     "splash": {
       "image": "./assets/logo2.png",
@@ -15,15 +15,48 @@
       "supportsTablet": true
     },
     "android": {
+      "permissions": ["INTERNET", "com.google.android.gms.permission.AD_ID"],
       "adaptiveIcon": {
-        "foregroundImage": "./assets/adaptive-icon.png",
+        "foregroundImage": "./assets/icon2.png",
         "backgroundColor": "#ffffff"
-      }
+      },
+      "package": "com.jachvictor.zikfair"
     },
     "web": {
       "favicon": "./assets/favicon.png",
       "bundler": "metro"
     },
-    "plugins": ["expo-font"]
+    "plugins": [
+      "expo-font",
+      [
+        "expo-build-properties",
+        {
+          "android": {
+            "enableProguardInReleaseBuilds": true,
+            "extraProguardRules": "-keep class com.google.android.gms.** { *; }",
+            "compileSdkVersion": 35,
+            "targetSdkVersion": 34,
+            "buildToolsVersion": "35.0.0",
+            "kotlinVersion": "1.9.25"
+          },
+          "ios": {
+            "useFrameworks": "static"
+          }
+        }
+      ],
+      [
+        "react-native-google-mobile-ads",
+        {
+          "androidAppId": "ca-app-pub-7487058490506362~4414161768",
+          "iosAppId": "ca-app-pub-7487058490506362~4414161768",
+          "kotlinVersion": "1.9.25"
+        }
+      ]
+    ],
+    "extra": {
+      "eas": {
+        "projectId": "a866d635-3f1f-4142-bc27-952f0ee66bfa"
+      }
+    }
   }
 }

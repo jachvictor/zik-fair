@@ -33,6 +33,7 @@ export default function Carousel({ data, renderItem, head }) {
         horizontal={true}
         data={data}
         renderItem={renderItem}
+        keyExtractor={(item, index) => index.toString()}
       />
     </View>
   );

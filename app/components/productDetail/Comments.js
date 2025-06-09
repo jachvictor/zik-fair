@@ -42,7 +42,7 @@ export default function Comments({ comments, name, rating, id, user }) {
       color: Colors.textSecondary,
       display: "flex",
       flexWrap: "wrap",
-      width: "100%",
+      // width: "100%",
     },
     rating: {
       display: "flex",
@@ -52,11 +52,32 @@ export default function Comments({ comments, name, rating, id, user }) {
       gap: 10,
       fontSize: Typography.fontSize.lg,
     },
+    profileIcon: {
+      display: "flex",
+      alignItems: "center",
+      justifyContent: "center",
+      height: 35,
+      width: 35,
+      borderRadius: 17.5,
+      borderColor: "white",
+      borderWidth: 2,
+      backgroundColor: Colors.accent,
+    },
+
+    profileIconText: {
+      display: "flex",
+      fontSize: 20,
+      color: "white",
+      textAlign: "center",
+      textAlignVertical: "center",
+    },
   });
 
   return (
     <View style={styles.container}>
-      <Text style={styles.icon}>{comments.sender[0]}</Text>
+      <View style={styles.profileIcon}>
+        <Text style={styles.profileIconText}>{comments.sender[0]}</Text>
+      </View>
 
       <View style={styles.details}>
         <Text style={styles.name}>{user ? "you" : comments.sender}</Text>
@@ -64,6 +85,7 @@ export default function Comments({ comments, name, rating, id, user }) {
           <AntDesign name="star" size={24} color="gold" />
           <Text style={{ color: Colors.textPrimary }}>{comments.rating}</Text>
         </View>
+        
         <Text style={styles.comment}>{comments.text}</Text>
       </View>
       {/* <Text>Comments</Text> */}
