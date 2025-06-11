@@ -18,7 +18,7 @@ export default function Carousel({ data, renderItem, head }) {
       textAlign: "left",
       // fontSize: "large",
       padding: 5,
-      fontSize: Typography.fontSize.xl,
+      fontSize: Typography.fontSize.lg,
       fontWeight: "bold",
       color: Colors.textPrimary,
     },

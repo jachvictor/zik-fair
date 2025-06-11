@@ -8,6 +8,7 @@ import {
   TouchableOpacity,
   View,
   Image,
+  ActivityIndicator,
 } from "react-native";
 import React, { useEffect, useState } from "react";
 import AntDesign from "@expo/vector-icons/AntDesign";
@@ -29,7 +30,7 @@ import {
   RewardedAdEventType,
   TestIds,
 } from "react-native-google-mobile-ads";
-import { ActivityIndicator } from "react-native-web";
+// import { ActivityIndicator } from "react-native-web";
 
 export default function AddBusiness() {
   const { Colors, Typography } = useTheme();
@@ -104,6 +105,7 @@ export default function AddBusiness() {
   const [businessImage, setBusinessImage] = useState(null);
   const [user, setUser] = useState(null);
   const [imageNo, setImageNo] = useState(1);
+
   useEffect(() => {
     const fetchUser = async () => {
       try {
@@ -279,7 +281,7 @@ export default function AddBusiness() {
     ? TestIds.REWARDED
     : "ca-app-pub-7487058490506362/6665624851";
   const rewarded = RewardedAd.createForAdRequest(rewardedId, {
-    requestNonPersonalizedAdsOnly: isNonPersonalized, 
+    requestNonPersonalizedAdsOnly: isNonPersonalized,
     keywords: ["fashion", "clothing"],
   });
   // rewarded ad
@@ -390,6 +392,7 @@ export default function AddBusiness() {
               <TextInput
                 style={styles.input}
                 placeholder="Business Address"
+                keyboardType="name-phone-pad"
                 placeholderTextColor={Colors.textPrimary}
                 value={form.address}
                 onChangeText={(val) => setForm({ ...form, address: val })}
@@ -508,7 +511,7 @@ export default function AddBusiness() {
             {!isReward && (
               <TouchableOpacity style={Button.button} onPress={handleWatchAd}>
                 <Text style={Button.buttonText}>
-                  🎁 Watch Ad for Reward 🎁 (add up 4 sample images)
+                  🎁 Watch Ad for Reward (add up 4 sample images)
                 </Text>
               </TouchableOpacity>
             )}

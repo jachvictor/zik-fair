@@ -199,7 +199,7 @@ export default function Search() {
         // Here, extract businesses and set it to the state
         setBusinesses(resData.businesses);
         setFilteredResults(resData.businesses); // Update this line to get the 'businesses' array
-        Toast.success(resData.message);
+        // Toast.success(resData.message);
       } else {
         setError(true);
         setLoading(false);

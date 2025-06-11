@@ -49,7 +49,7 @@ const PrivacyPolicyScreen = () => {
   return (
     <ScrollView contentContainerStyle={styles.container}>
       <Text style={styles.header}>🔐 Privacy Policy</Text>
-      <Text style={styles.subText}>Effective Date:[]</Text>
+      <Text style={styles.subText}>Effective Date: June 15, 2025</Text>
 
       <Text style={styles.paragraph}>
         <Text style={styles.boldItalic}>Zikfair</Text> is committed to
@@ -132,7 +132,8 @@ const PrivacyPolicyScreen = () => {
         </Text>
       </View>
       <Text style={styles.paragraph}>
-        To exercise these rights, please contact us at [zikhub@gmail.com].
+        To exercise these rights, please contact us at
+        [zikhub.project@gmail.com].
       </Text>
 
       <Text style={styles.sectionHeader}>6. Changes to This Policy</Text>

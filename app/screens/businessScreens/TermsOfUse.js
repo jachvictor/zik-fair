@@ -50,18 +50,18 @@ const TermsOfUseScreen = () => {
   return (
     <ScrollView contentContainerStyle={styles.container}>
       <Text style={styles.header}>📄 Terms of Use</Text>
-      <Text style={styles.subText}>Effective Date: []</Text>
+      <Text style={styles.subText}>Effective Date: June 15, 2025</Text>
 
       <Text style={styles.paragraph}>
         These Terms of Use govern your access to and use of the{" "}
-        <Text style={styles.boldItalic}>Zikfair Business Directory</Text> mobile
+        <Text style={styles.boldItalic}>ZikFair Business Directory</Text> mobile
         application. By accessing or using the App, you agree to be bound by
         these Terms.
       </Text>
 
       <Text style={styles.sectionHeader}>1. Eligibility</Text>
       <Text style={styles.paragraph}>
-        There is no age limit in accessing Zikfair. Only verified UNIZIK
+        There is no age restriction for accessing ZikFair. Only verified UNIZIK
         students are permitted to upload and manage business listings.
       </Text>
 
@@ -130,7 +130,7 @@ const TermsOfUseScreen = () => {
       <Text style={styles.sectionHeader}>8. Governing Law</Text>
       <Text style={styles.paragraph}>
         These Terms shall be governed by and construed in accordance with the
-        laws of [Insert Jurisdiction].
+        laws of Federal Republic of Nigeria..
       </Text>
     </ScrollView>
   );

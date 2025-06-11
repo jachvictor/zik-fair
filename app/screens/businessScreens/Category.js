@@ -42,12 +42,12 @@ export default function Category({ route }) {
         setBusinesses(resData.businesses || []);
         setSelectedCategory(cat);
         const count = await AsyncStorage.getItem("adCountC");
-        console.log("adcount", count);
+        // console.log("adcount", count);
         await AsyncStorage.setItem(
           "adCountC",
           (parseInt(count) + 1).toString()
         );
-        Toast.success(resData.message || "Businesses loaded.");
+        // Toast.success(resData.message || "Businesses loaded.");
       } else {
         Toast.error(resData.message || "Failed to load businesses.");
       }

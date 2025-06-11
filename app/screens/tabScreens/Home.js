@@ -159,7 +159,7 @@ export default function Home() {
 
       if (response.ok) {
         setLoading(false);
-        Toast.success(resData.message);
+        // Toast.success(resData.message);
 
         // Here, extract businesses and set it to the state
         setBusinesses(resData.businesses); // Update this line to get the 'businesses' array
@@ -285,11 +285,7 @@ export default function Home() {
     <>
       {loading ? (
         <ActivityIndicator
-          style={{
-            height: "100%",
-            width: "100%",
-            backgroundColor: Colors.background,
-          }}
+          style={{ flex: 1, width: "100%", backgroundColor: Colors.background }}
           size="large"
           color={Colors.primary}
         />

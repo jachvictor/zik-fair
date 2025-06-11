@@ -112,7 +112,7 @@ export default function ProductDetail({ route }) {
       height: "100%",
     },
     name: {
-      fontSize: Typography.fontSize.lg,
+      fontSize: Typography.fontSize.xl,
       fontWeight: "bold",
       color: Colors.textPrimary,
     },
@@ -130,9 +130,10 @@ export default function ProductDetail({ route }) {
       flexDirection: "row",
       alignItems: "center",
       justifyContent: "space-between",
+      flexWrap: "wrap",
       width: "100%",
       padding: 16,
-      // gap: 10,
+      gap: 10,
     },
     about: {
       display: "flex",
@@ -162,7 +163,7 @@ export default function ProductDetail({ route }) {
       textAlign: "left",
       // fontSize: "large",
       padding: 5,
-      fontSize: Typography.fontSize.xl,
+      fontSize: Typography.fontSize.lg,
       fontWeight: "bold",
       color: Colors.textPrimary,
     },
@@ -538,19 +539,22 @@ export default function ProductDetail({ route }) {
                     <AntDesign name="star" size={24} color="gold" />
                     <Text style={{ color: Colors.textPrimary }}>{rating}</Text>
                   </View>
-
-                  <Text
-                    style={{
-                      fontSize: Typography.fontSize.lg,
-                      color: Colors.textPrimary,
-                    }}
-                  >
-                    {business.category}
-                  </Text>
+                  <View>
+                    <ScrollView horizontal>
+                      <Text
+                        style={{
+                          fontSize: Typography.fontSize.lg,
+                          color: Colors.textPrimary,
+                        }}
+                      >
+                        {business.category}
+                      </Text>
+                    </ScrollView>
+                  </View>
                 </View>
 
                 <Carousel
-                  head={"Business Details >"}
+                  head={"Contact Information >"}
                   data={data}
                   renderItem={renderItem}
                 />
@@ -605,7 +609,7 @@ export default function ProductDetail({ route }) {
               <View style={{ padding: 10 }}>
                 <Text style={styles.header}>Comments</Text>
                 {business.comments?.length < 1 ? (
-                  <Text style={styles.address}>No reviewa yet</Text>
+                  <Text style={styles.address}>No reviews yet</Text>
                 ) : (
                   <View style={{ width: "100%", display: "flex" }}>
                     <FlatList

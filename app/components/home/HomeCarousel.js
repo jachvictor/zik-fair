@@ -115,7 +115,7 @@ export default function HomeCarousel() {
           source={accurate1}
           head={"Accuracy"}
           quote={
-            "Provide accurate and complete information about businesses, including contact information and location "
+            "Accurate and complete business details, including contact info and location, all in one place."
           }
         />
       );
@@ -127,7 +127,7 @@ export default function HomeCarousel() {
           source={review}
           head={"Review Management"}
           quote={
-            "consumer decisions implementation that allows customers to leave feedback"
+            "An easy-to-use feedback system that lets customers share their experiences and help others make informed decisions."
           }
         />
       );
@@ -136,7 +136,9 @@ export default function HomeCarousel() {
         <CarouselImgR
           source={mobile1}
           head={"Mobile Optimization"}
-          quote={"Listing is accessible and looks good on any device,"}
+          quote={
+            "Business listings are fully responsive and visually appealing across all devices, ensuring a smooth browsing experience."
+          }
         />
       );
     } else if (item === "6") {

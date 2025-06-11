@@ -193,12 +193,12 @@ const ContactUsScreen = () => {
 
               <Text style={styles.label}>Email:</Text>
               <TouchableOpacity onPress={handleEmailPress}>
-                <Text style={styles.link}>unilink.support@zikfair.com</Text>
+                <Text style={styles.link}>zikfair.project@gmail.com</Text>
               </TouchableOpacity>
 
               <Text style={styles.label}>Phone:</Text>
               <TouchableOpacity onPress={handlePhonePress}>
-                <Text style={styles.link}>+234 800 123 4567</Text>
+                <Text style={styles.link}>+234 701 864 7050</Text>
               </TouchableOpacity>
 
               <Text style={styles.label}>Location:</Text>
